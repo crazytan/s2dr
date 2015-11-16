@@ -1,5 +1,7 @@
 package Client;
 
+import Channel.Channel;
+
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
@@ -13,7 +15,11 @@ public class Client {
 
     private SecretKey masterKey;
 
-    public UID getName() { return name; }
+    private Channel channel;
+
+    public UID getName() {
+        return name;
+    }
 
     public Client(String name) {
         this.name = new UID(name);
@@ -26,9 +32,13 @@ public class Client {
         catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
+
+        channel = null;
     }
 
-    public void init_session(String hostname) {}
+    public void init_session(String hostname) {
+        channel = new Channel(hostname, masterKey);
+    }
 
     public void check_out(UID document_id) {}
 

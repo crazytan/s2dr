@@ -17,7 +17,7 @@ public final class UID {
         return id;
     }
 
-    @Override public String toString() {
+    public String toString() {
         return "UID: " + id;
     }
 }
