@@ -1,6 +1,6 @@
 package Client;
 
-import Channel.Channel;
+import com.oracle.javafx.jmx.json.JSONDocument;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -13,9 +13,10 @@ public class Client {
 
     private UID name;
 
+    // 128-bit master key for generating key identifier
     private SecretKey masterKey;
 
-    private Channel channel;
+    private Client() {}
 
     public UID getName() {
         return name;
@@ -32,28 +33,68 @@ public class Client {
         catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-
-        channel = null;
     }
 
-    public void init_session(String hostname) {
-        channel = new Channel(hostname, masterKey);
+    public JSONDocument init_session(String hostname) {
+        return Channel.createChannel(name, hostname, masterKey);
     }
 
-    public void check_out(UID document_id) {}
+    public JSONDocument check_out(UID document_id) {
+        return Channel.send(name, "checkout", "{\"uid\":\"" + document_id + "\"}");
+    }
 
-    public void check_in(UID document_id, SecurityFlag flag) {}
+    public JSONDocument check_in(UID document_id, String document, SecurityFlag flag) {
+        return Channel.send(name, "checkin", "{\"uid\":\"" + document_id + "\"}\"," +
+                                             "\"document\":\"" + document + "\"," +
+                                             "\"flag\":" + flag + "}");
+    }
 
-    public void delegate(UID document_id, Client c, int time,
-                         Permission p, boolean propagationFlag) {}
+    public JSONDocument delegate(UID document_id, Client c, int time,
+                         Permission p, boolean propagationFlag) {
+        return Channel.send(name, "delegate", "{\"uid\":\"" + document_id + "\"}\"," +
+                                              "\"client\":\"" + c.getName() + "\"," +
+                                              "\"time\":" + time + "," +
+                                              "\"permission\":" + p + "," +
+                                              "\"flag\":" + (propagationFlag ? 1 : 0) + "}");
+    }
 
-    public void safe_delete(UID document_id) {}
+    public JSONDocument safe_delete(UID document_id) {
+        return Channel.send(name, "delete", "{\"uid\":\"" + document_id + "\"}");
+    }
 
-    public void terminate() {}
+    public JSONDocument terminate() {
+        return Channel.send(name, "terminate", "");
+    }
 
-    public static Client All;
+    public static Client All = new Client() {
+        @Override
+        public UID getName() {
+            return new UID("all");
+        }
+    };
+
+    public enum Permission {
+        checkin, checkout, both, owner
+    }
+
+    public enum SecurityFlag {
+        none, confidentiality, integrity, both
+    }
+
+    public final class UID {
+        public String id;
+
+        public UID(String id) {
+            this.id = id;
+        }
+
+        public String toString() {
+            return id;
+        }
+    }
 
     public static void main(String[] args) {
         Client c = new Client("tan");
+        System.out.println(Client.All.getName());
     }
 }
