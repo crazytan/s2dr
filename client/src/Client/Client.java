@@ -23,6 +23,7 @@ public class Client {
     }
 
     public Client(String name) {
+
         this.name = new UID(name);
 
         // generate master key
