@@ -3,7 +3,7 @@ package Client;
 import com.oracle.javafx.jmx.json.JSONDocument;
 
 import javax.crypto.SecretKey;
-import java.util.HashMap;
+import java.util.Map;
 
 import Client.Client.UID;
 
@@ -20,12 +20,11 @@ public class Channel {
 
     private final String host;
 
-    private static HashMap<UID, Channel> channels;
+    private static Map<UID, Channel> channels;
 
     public static JSONDocument createChannel(UID clientName, String hostname, SecretKey masterKey) {
         JSONDocument result = JSONDocument.createObject();
-        /*result.setNumber("result", 0);
-        result.setString("message", "");*/
+        // TODO
         return result;
     }
 
@@ -42,10 +41,17 @@ public class Channel {
 
     private JSONDocument send(String route, String message) {
         JSONDocument result = JSONDocument.createObject();
+        // TODO
         return result;
     }
 
     public static JSONDocument send(UID clientName, String route, String message) {
-        return channels.get(clientName).send(route, message);
+        if (channels.containsKey(clientName)) {
+            return channels.get(clientName).send(route, message);
+        }
+        JSONDocument result = JSONDocument.createObject();
+        result.setNumber("result", 1);
+        result.setString("message", "client name not found!");
+        return result;
     }
 }
