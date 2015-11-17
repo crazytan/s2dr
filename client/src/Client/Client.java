@@ -1,21 +1,100 @@
 package Client;
 
+import com.oracle.javafx.jmx.json.JSONDocument;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import java.security.NoSuchAlgorithmException;
+
 /*
  * A class representing the client side of s2dr service.
  */
 public class Client {
-    public void init_session(String hostname) {}
 
-    public void check_out(UID document_id) {}
+    private UID name;
 
-    public void check_in(UID document_id, SecurityFlag flag) {}
+    // 128-bit master key for generating key identifier
+    private SecretKey masterKey;
 
-    public void delegate(UID document_id, Client c, int time,
-                         Permission p, boolean propagationFlag) {}
+    private Client() {}
 
-    public void safe_delete(UID document_id) {}
+    public UID getName() {
+        return name;
+    }
 
-    public void terminate() {}
+    public Client(String name) {
+        this.name = new UID(name);
 
-    public static Client All;
+        // generate master key
+        try {
+            KeyGenerator gen = KeyGenerator.getInstance("AES");
+            masterKey = gen.generateKey();
+        }
+        catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public JSONDocument init_session(String hostname) {
+        return Channel.createChannel(name, hostname, masterKey);
+    }
+
+    public JSONDocument check_out(UID document_id) {
+        return Channel.send(name, "checkout", "{\"uid\":\"" + document_id + "\"}");
+    }
+
+    public JSONDocument check_in(UID document_id, String document, SecurityFlag flag) {
+        return Channel.send(name, "checkin", "{\"uid\":\"" + document_id + "\"}\"," +
+                                             "\"document\":\"" + document + "\"," +
+                                             "\"flag\":" + flag + "}");
+    }
+
+    public JSONDocument delegate(UID document_id, Client c, int time,
+                         Permission p, boolean propagationFlag) {
+        return Channel.send(name, "delegate", "{\"uid\":\"" + document_id + "\"}\"," +
+                                              "\"client\":\"" + c.getName() + "\"," +
+                                              "\"time\":" + time + "," +
+                                              "\"permission\":" + p + "," +
+                                              "\"flag\":" + (propagationFlag ? 1 : 0) + "}");
+    }
+
+    public JSONDocument safe_delete(UID document_id) {
+        return Channel.send(name, "delete", "{\"uid\":\"" + document_id + "\"}");
+    }
+
+    public JSONDocument terminate() {
+        return Channel.send(name, "terminate", "");
+    }
+
+    public static Client All = new Client() {
+        @Override
+        public UID getName() {
+            return new UID("all");
+        }
+    };
+
+    public enum Permission {
+        checkin, checkout, both, owner
+    }
+
+    public enum SecurityFlag {
+        none, confidentiality, integrity, both
+    }
+
+    public final class UID {
+        public String id;
+
+        public UID(String id) {
+            this.id = id;
+        }
+
+        public String toString() {
+            return id;
+        }
+    }
+
+    public static void main(String[] args) {
+        Client c = new Client("tan");
+        System.out.println(Client.All.getName());
+    }
 }
