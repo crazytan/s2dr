@@ -14,7 +14,7 @@ public class InsecureMessage {
 
     private String message;
 
-    protected InsecureMessage(int result, String message) {
+    private InsecureMessage(int result, String message) {
         this.result = result;
         this.message = message;
     }
@@ -27,6 +27,7 @@ public class InsecureMessage {
         return message;
     }
 
+    @Override
     public String toString() {
         return gson.toJson(this);
     }

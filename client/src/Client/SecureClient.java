@@ -27,6 +27,7 @@ public class SecureClient {
         // generate master key
         try {
             KeyGenerator gen = KeyGenerator.getInstance("AES");
+            gen.init(128);
             masterKey = gen.generateKey();
         }
         catch (NoSuchAlgorithmException e) {

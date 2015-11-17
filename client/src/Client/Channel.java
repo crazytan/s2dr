@@ -1,6 +1,10 @@
 package Client;
 
+import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
 import Client.SecureClient.UID;
@@ -12,26 +16,75 @@ public class Channel {
 
     private SecretKey key;
 
-    private SecretKey masterKey;
+    private String clientIdentifier;
 
-    private byte[] identifier;
+    private String serverIdentifier;
 
     private InsecureClient _client;
 
-    private Channel(SecretKey key, SecretKey masterKey, byte[] identifier, InsecureClient _client) {
+    private Channel(SecretKey key, String clientIdentifier, String serverIdentifier, InsecureClient _client) {
         this.key = key;
-        this.masterKey = masterKey;
-        this.identifier = identifier;
+        this.clientIdentifier = clientIdentifier;
+        this.serverIdentifier = serverIdentifier;
         this._client = _client;
     }
 
-    private InsecureMessage send(String route, String message) {
-        // Message result = Message.newMessage();
-        // TODO
-        return null;
+    private String encrypt(String plainText) {
+        try {
+            Cipher cipher = getAESCipher();
+            cipher.init(Cipher.ENCRYPT_MODE, key);
+            // TODO
+            byte[] encrypted = cipher.doFinal(plainText.getBytes("US-ASCII"));
+            return new String(encrypted, "US-ASCII");
+        }
+        catch (InvalidKeyException e) {
+            e.printStackTrace();
+            return "";
+        }
+        catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    private String decrypt(String cipherText) {
+        try {
+            Cipher cipher = getAESCipher();
+            cipher.init(Cipher.DECRYPT_MODE, key);
+            // TODO
+            byte[] encrypted = cipher.doFinal(cipherText.getBytes("US-ASCII"));
+            return new String(encrypted, "US-ASCII");
+        }
+        catch (InvalidKeyException e) {
+            e.printStackTrace();
+            return "";
+        }
+        catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    private SecureMessage send(String route, String message) {
+        try {
+            String response = _client.send(route,
+                    "{\"identifier\":\"" + clientIdentifier + "\"," +
+                    "\"message\":\"" + encrypt(message) + "\"}");
+            return SecureMessage.newMessage(response);
+        }
+        catch (Exception e) {
+            return SecureMessage.errorMessage(e.getMessage());
+        }
     }
 
     private static Map<UID, Channel> channels;
+
+    private static Cipher getAESCipher() {
+        try {
+            return Cipher.getInstance("AES");
+        }
+        catch (Exception e) { return null; }
+    }
 
     public static InsecureMessage createChannel(UID clientName, String hostname, SecretKey masterKey) {
         InsecureClient _client = new InsecureClient(discover(hostname));
@@ -40,10 +93,10 @@ public class Channel {
         SecretKey key = null;
 
         // TODO: generate identifier
-        byte[] identifier = null;
+        String identifier = null;
 
         // TODO: put a new Channel in the map
-        channels.put(clientName, new Channel(key, masterKey, identifier, _client));
+        channels.put(clientName, new Channel(key, identifier, _client));
 
         //Message result = Message.newMessage();
         // TODO
@@ -56,7 +109,12 @@ public class Channel {
 
     public static InsecureMessage send(UID clientName, String route, String message) {
         if (channels.containsKey(clientName)) {
-            return channels.get(clientName).send(route, message);
+            Channel channel = channels.get(clientName);
+            SecureMessage m = channel.send(route, message);
+            if (!m.isSuccess()) return InsecureMessage.errorMessage(m.getMessage());
+            if (!m.getIdentifier().equals(channel.serverIdentifier))
+                return InsecureMessage.errorMessage("unrecognized identifier!");
+            return InsecureMessage.newMessage(channel.decrypt(m.getMessage()));
         }
         return InsecureMessage.errorMessage("client name not found!");
     }
