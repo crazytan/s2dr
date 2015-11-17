@@ -3,8 +3,7 @@ package Client;
 import javax.crypto.SecretKey;
 import java.util.Map;
 
-import Client.InsecureClient;
-import Client.Client.UID;
+import Client.SecureClient.UID;
 
 /**
  * A secure channel used by client
@@ -27,9 +26,9 @@ public class Channel {
     }
 
     private Message send(String route, String message) {
-        Message result = Message.newMessage();
+        // Message result = Message.newMessage();
         // TODO
-        return result;
+        return null;
     }
 
     private static Map<UID, Channel> channels;
@@ -46,9 +45,9 @@ public class Channel {
         // TODO: put a new Channel in the map
         channels.put(clientName, new Channel(key, masterKey, identifier, _client));
 
-        Message result = Message.newMessage();
+        //Message result = Message.newMessage();
         // TODO
-        return result;
+        return null;
     }
 
     private static String discover(String hostname) {
