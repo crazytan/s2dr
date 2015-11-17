@@ -25,7 +25,7 @@ public class Channel {
         this._client = _client;
     }
 
-    private Message send(String route, String message) {
+    private InsecureMessage send(String route, String message) {
         // Message result = Message.newMessage();
         // TODO
         return null;
@@ -33,7 +33,7 @@ public class Channel {
 
     private static Map<UID, Channel> channels;
 
-    public static Message createChannel(UID clientName, String hostname, SecretKey masterKey) {
+    public static InsecureMessage createChannel(UID clientName, String hostname, SecretKey masterKey) {
         InsecureClient _client = new InsecureClient(discover(hostname));
 
         // TODO: symmetric key to channel encryption
@@ -54,10 +54,10 @@ public class Channel {
         return "http://localhost:8888";
     }
 
-    public static Message send(UID clientName, String route, String message) {
+    public static InsecureMessage send(UID clientName, String route, String message) {
         if (channels.containsKey(clientName)) {
             return channels.get(clientName).send(route, message);
         }
-        return Message.errorMessage("client name not found!");
+        return InsecureMessage.errorMessage("client name not found!");
     }
 }

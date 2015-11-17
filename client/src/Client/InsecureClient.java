@@ -17,7 +17,7 @@ public class InsecureClient {
         this.serverUrl = host;
     }
 
-    public Message send(String route, String message) {
+    public String send(String route, String message) {
         HttpURLConnection connection = null;
         try {
             // open an url connection
@@ -34,18 +34,17 @@ public class InsecureClient {
             // get the response
             // TODO: make sure the stream is exhausted
             InputStream in = new BufferedInputStream(connection.getInputStream());
-            byte[] arr = new byte[in.available()];
-            in.read(arr, 0, in.available());
-            String response = new String(arr, "US-ASCII");
-            return Message.newMessage(response);
+            byte[] response = new byte[in.available()];
+            in.read(response, 0, in.available());
+            return new String(response, "US-ASCII");
         }
         catch (MalformedURLException e) {
             e.printStackTrace();
-            return Message.errorMessage("invalid URL!");
+            return SecureMessage.errorMessage("invalid URL!").toString();
         }
         catch (IOException e) {
             e.printStackTrace();
-            return Message.errorMessage("can't establish connection!");
+            return SecureMessage.errorMessage("can't establish connection!").toString();
         }
         finally {
             if (connection != null) connection.disconnect();

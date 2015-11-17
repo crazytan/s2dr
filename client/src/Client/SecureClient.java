@@ -34,22 +34,22 @@ public class SecureClient {
         }
     }
 
-    public Message init_session(String hostname) {
+    public InsecureMessage init_session(String hostname) {
         return Channel.createChannel(name, hostname, masterKey);
     }
 
-    public Message check_out(UID document_id) {
+    public InsecureMessage check_out(UID document_id) {
         return Channel.send(name, "checkout", "{\"uid\":\"" + document_id + "\"}");
     }
 
-    public Message check_in(UID document_id, String document, SecurityFlag flag) {
+    public InsecureMessage check_in(UID document_id, String document, SecurityFlag flag) {
         return Channel.send(name, "checkin", "{\"uid\":\"" + document_id + "\"}\"," +
                                              "\"document\":\"" + document + "\"," +
                                              "\"flag\":" + flag + "}");
     }
 
-    public Message delegate(UID document_id, SecureClient c, int time,
-                                 Permission p, boolean propagationFlag) {
+    public InsecureMessage delegate(UID document_id, SecureClient c, int time,
+                                    Permission p, boolean propagationFlag) {
         return Channel.send(name, "delegate", "{\"uid\":\"" + document_id + "\"}\"," +
                                               "\"client\":\"" + c.getName() + "\"," +
                                               "\"time\":" + time + "," +
@@ -57,11 +57,11 @@ public class SecureClient {
                                               "\"flag\":" + (propagationFlag ? 1 : 0) + "}");
     }
 
-    public Message safe_delete(UID document_id) {
+    public InsecureMessage safe_delete(UID document_id) {
         return Channel.send(name, "delete", "{\"uid\":\"" + document_id + "\"}");
     }
 
-    public Message terminate() {
+    public InsecureMessage terminate() {
         return Channel.send(name, "terminate", "");
     }
 
