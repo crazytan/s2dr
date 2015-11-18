@@ -1,11 +1,13 @@
 package Client;
 
-import com.oracle.javafx.jmx.json.JSONDocument;
-
+import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
-import Client.Client.UID;
+import Client.SecureClient.UID;
 
 /**
  * A secure channel used by client
@@ -14,44 +16,106 @@ public class Channel {
 
     private SecretKey key;
 
-    private SecretKey masterKey;
+    private String clientIdentifier;
 
-    private byte[] identifier;
+    private String serverIdentifier;
 
-    private final String host;
+    private InsecureClient _client;
+
+    private Channel(SecretKey key, String clientIdentifier, String serverIdentifier, InsecureClient _client) {
+        this.key = key;
+        this.clientIdentifier = clientIdentifier;
+        this.serverIdentifier = serverIdentifier;
+        this._client = _client;
+    }
+
+    private String encrypt(String plainText) {
+        try {
+            Cipher cipher = getAESCipher();
+            cipher.init(Cipher.ENCRYPT_MODE, key);
+            // TODO
+            byte[] encrypted = cipher.doFinal(plainText.getBytes("US-ASCII"));
+            return new String(encrypted, "US-ASCII");
+        }
+        catch (InvalidKeyException e) {
+            e.printStackTrace();
+            return "";
+        }
+        catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    private String decrypt(String cipherText) {
+        try {
+            Cipher cipher = getAESCipher();
+            cipher.init(Cipher.DECRYPT_MODE, key);
+            // TODO
+            byte[] encrypted = cipher.doFinal(cipherText.getBytes("US-ASCII"));
+            return new String(encrypted, "US-ASCII");
+        }
+        catch (InvalidKeyException e) {
+            e.printStackTrace();
+            return "";
+        }
+        catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    private SecureMessage send(String route, String message) {
+        try {
+            String response = _client.send(route,
+                    "{\"identifier\":\"" + clientIdentifier + "\"," +
+                    "\"message\":\"" + encrypt(message) + "\"}");
+            return SecureMessage.newMessage(response);
+        }
+        catch (Exception e) {
+            return SecureMessage.errorMessage(e.getMessage());
+        }
+    }
 
     private static Map<UID, Channel> channels;
 
-    public static JSONDocument createChannel(UID clientName, String hostname, SecretKey masterKey) {
-        JSONDocument result = JSONDocument.createObject();
-        // TODO
-        return result;
+    private static Cipher getAESCipher() {
+        try {
+            return Cipher.getInstance("AES");
+        }
+        catch (Exception e) { return null; }
     }
 
-    private Channel(SecretKey key, SecretKey masterKey, byte[] identifier, String host) {
-        this.key = key;
-        this.masterKey = masterKey;
-        this.identifier = identifier;
-        this.host = host;
+    public static InsecureMessage createChannel(UID clientName, String hostname, SecretKey masterKey) {
+        InsecureClient _client = new InsecureClient(discover(hostname));
+
+        // TODO: symmetric key to channel encryption
+        SecretKey key = null;
+
+        // TODO: generate identifier
+        String identifier = null;
+
+        // TODO: put a new Channel in the map
+        channels.put(clientName, new Channel(key, identifier, _client));
+
+        //Message result = Message.newMessage();
+        // TODO
+        return null;
     }
 
     private static String discover(String hostname) {
         return "http://localhost:8888";
     }
 
-    private JSONDocument send(String route, String message) {
-        JSONDocument result = JSONDocument.createObject();
-        // TODO
-        return result;
-    }
-
-    public static JSONDocument send(UID clientName, String route, String message) {
+    public static InsecureMessage send(UID clientName, String route, String message) {
         if (channels.containsKey(clientName)) {
-            return channels.get(clientName).send(route, message);
+            Channel channel = channels.get(clientName);
+            SecureMessage m = channel.send(route, message);
+            if (!m.isSuccess()) return InsecureMessage.errorMessage(m.getMessage());
+            if (!m.getIdentifier().equals(channel.serverIdentifier))
+                return InsecureMessage.errorMessage("unrecognized identifier!");
+            return InsecureMessage.newMessage(channel.decrypt(m.getMessage()));
         }
-        JSONDocument result = JSONDocument.createObject();
-        result.setNumber("result", 1);
-        result.setString("message", "client name not found!");
-        return result;
+        return InsecureMessage.errorMessage("client name not found!");
     }
 }

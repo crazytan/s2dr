@@ -1,7 +1,5 @@
 package Client;
 
-import com.oracle.javafx.jmx.json.JSONDocument;
-
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
@@ -9,25 +7,27 @@ import java.security.NoSuchAlgorithmException;
 /*
  * A class representing the client side of s2dr service.
  */
-public class Client {
+public class SecureClient {
 
     private UID name;
 
     // 128-bit master key for generating key identifier
     private SecretKey masterKey;
 
-    private Client() {}
+    private SecureClient() {}
 
     public UID getName() {
         return name;
     }
 
-    public Client(String name) {
+    public SecureClient(String name) {
+
         this.name = new UID(name);
 
         // generate master key
         try {
             KeyGenerator gen = KeyGenerator.getInstance("AES");
+            gen.init(128);
             masterKey = gen.generateKey();
         }
         catch (NoSuchAlgorithmException e) {
@@ -35,22 +35,22 @@ public class Client {
         }
     }
 
-    public JSONDocument init_session(String hostname) {
+    public InsecureMessage init_session(String hostname) {
         return Channel.createChannel(name, hostname, masterKey);
     }
 
-    public JSONDocument check_out(UID document_id) {
+    public InsecureMessage check_out(UID document_id) {
         return Channel.send(name, "checkout", "{\"uid\":\"" + document_id + "\"}");
     }
 
-    public JSONDocument check_in(UID document_id, String document, SecurityFlag flag) {
+    public InsecureMessage check_in(UID document_id, String document, SecurityFlag flag) {
         return Channel.send(name, "checkin", "{\"uid\":\"" + document_id + "\"}\"," +
                                              "\"document\":\"" + document + "\"," +
                                              "\"flag\":" + flag + "}");
     }
 
-    public JSONDocument delegate(UID document_id, Client c, int time,
-                         Permission p, boolean propagationFlag) {
+    public InsecureMessage delegate(UID document_id, SecureClient c, int time,
+                                    Permission p, boolean propagationFlag) {
         return Channel.send(name, "delegate", "{\"uid\":\"" + document_id + "\"}\"," +
                                               "\"client\":\"" + c.getName() + "\"," +
                                               "\"time\":" + time + "," +
@@ -58,15 +58,15 @@ public class Client {
                                               "\"flag\":" + (propagationFlag ? 1 : 0) + "}");
     }
 
-    public JSONDocument safe_delete(UID document_id) {
+    public InsecureMessage safe_delete(UID document_id) {
         return Channel.send(name, "delete", "{\"uid\":\"" + document_id + "\"}");
     }
 
-    public JSONDocument terminate() {
+    public InsecureMessage terminate() {
         return Channel.send(name, "terminate", "");
     }
 
-    public static Client All = new Client() {
+    public static SecureClient All = new SecureClient() {
         @Override
         public UID getName() {
             return new UID("all");
@@ -94,7 +94,7 @@ public class Client {
     }
 
     public static void main(String[] args) {
-        Client c = new Client("tan");
-        System.out.println(Client.All.getName());
+        SecureClient c = new SecureClient("tan");
+        System.out.println(SecureClient.All.getName());
     }
 }
