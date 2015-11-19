@@ -9,7 +9,7 @@ router.post('/', function(req, res, next) {
     db.getMeta(uid, function (err, meta) {
         if (err) {
             response.result = 1;
-            response.message = 'error getting metadata!';
+            response.message = 'unable to get metadata!';
             next();
         }
         else {
@@ -23,7 +23,7 @@ router.post('/', function(req, res, next) {
                 db.deleteMeta(uid, function (err) {
                     if (err) {
                         response.result = 1;
-                        response.message  = 'error deleting metadata!';
+                        response.message  = 'unable to delete metadata!';
                         next();
                     }
                     else {

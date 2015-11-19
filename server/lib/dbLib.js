@@ -34,3 +34,7 @@ exports.deleteMeta = function (uid, callback) {
 exports.deleteChannel = function (identifier, callback) {
 
 };
+
+exports.delegate = function (message, entry, callback) {
+
+};

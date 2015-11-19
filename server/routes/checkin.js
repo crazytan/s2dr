@@ -24,14 +24,14 @@ router.post('/', function(req, res, next) {
         db.getMeta(req.s2dr.message.uid, function (err, meta) {
             if (err) {
                 response.result = 1;
-                response.message = 'error getting metadata!';
+                response.message = 'unable to get metadata!';
                 next();
             }
             else {
                 var ifPermit = doc.checkPermit(meta.acl, req.s2dr.channel.client, doc.opEnum.checkIn);
                 if (!ifPermit) {
                     response.result = 1;
-                    response.message = 'permission denied!';
+                    response.message = 'unable to check in: permission denied!';
                     next();
                 }
                 else {

@@ -8,7 +8,7 @@ router.post('/', function(req, res, next) {
     db.getMeta(req.body.uid, function (err, meta) {
         if (err) {
             response.result = 1;
-            response.message = 'error getting metadata!';
+            response.message = 'unable to get metadata!';
             next();
         }
         else {
@@ -22,7 +22,7 @@ router.post('/', function(req, res, next) {
                 doc.getDoc(meta, function (err, document) {
                     if (err) {
                         response.result = 1;
-                        response.message = 'document retrieval failed!';
+                        response.message = 'unable to retrieve document!';
                         next();
                     }
                     response.result = 0;
