@@ -1,5 +1,6 @@
 var express = require('express');
-var path = require('path');
+var bodyParser = require('body-parser');
+//var path = require('path');
 
 var decrypt = require('./routes/decrypt');
 var init_session = require('./routes/init');
@@ -11,6 +12,10 @@ var terminate_session = require('./routes/terminate');
 
 var app = express();
 
+// set up body parser
+app.use(bodyParser.json());
+
+// set up routers for client calls
 app.use('/init', init_session);
 app.use('/checkout', decrypt, check_out);
 app.use('/checkin', decrypt, check_in);
