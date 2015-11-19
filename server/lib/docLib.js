@@ -3,6 +3,7 @@
  */
 var fs = require('fs');
 var db = require('../lib/dbLib');
+var crypto = require('../lib/cryptoLib');
 
 exports.opEnum = {
     checkIn: 0,
@@ -27,11 +28,47 @@ exports.checkDelegate = function (message, meta, callback) {
 };
 
 exports.getDoc = function (meta, callback) {
-    // TODO: check flag
-    fs.readFile('../docs/' + meta.UID, function (err, data) {
-        if (err) callback(err, null);
-        else callback(null, data);
-    });
+    var path = '../docs/' + meta.UID;
+    if (meta.flag == this.secFlag.none) {
+        fs.readFile(path, function (err, data) {
+            if (err) callback(err, null);
+            else callback(null, data);
+        });
+    }
+    else if (meta.flag == this.secFlag.confidentiality) {
+        var key = crypto.decryptKey(meta.key);
+        fs.readFile(path, function (err, data) {
+            if (err) callback(err, null);
+            else {
+                callback(null, crypto.decryptAES(data, key));
+            }
+        });
+    }
+    else if (meta.flag == this.secFlag.integrity) {
+        var key = crypto.decryptKey(meta.key);
+        var decryptedSignature = crypto.decryptAES(meta.signature, key);
+        fs.readFile(path, function (err, data) {
+            if (err) callback(err, null);
+            else {
+                var signature = crypto.hash(data);
+                if (signature !== decryptedSignature) callback(new Error(), null);
+                else callback(null, data);
+            }
+        });
+    }
+    else {
+        var key = crypto.decryptKey(meta.key);
+        var decryptedSignature = crypto.decryptAES(meta.signature, key);
+        fs.readFile(path, function (err, data) {
+            if (err) callback(err, null);
+            else {
+                var plainText = crypto.decryptAES(data, key);
+                var signature = crypto.hash(plainText);
+                if (signature !== decryptedSignature) callback(new Error(), null);
+                else callback(null, plainText);
+            }
+        });
+    }
 };
 
 exports.addDoc = function (channel, message, callback) {

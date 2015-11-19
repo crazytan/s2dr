@@ -11,7 +11,7 @@ getDocument = function (collectionName, property, callback) {
             db.collection(collectionName).find(property).toArray(function (err, items) {
                 if (err) callback(err, null);
                 else {
-                    if (items.length != 1) callback(new ErrorObject(), null);
+                    if (items.length != 1) callback(new Error(), null);
                     else callback(null, items[0]);
                 }
             });
