@@ -1,8 +1,11 @@
 package Client;
 
+import sun.lwawt.macosx.CImage;
+
+import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 
 /*
  * A class representing the client side of s2dr service.
@@ -13,6 +16,10 @@ public class SecureClient {
 
     // 128-bit master key for generating key identifier
     private SecretKey masterKey;
+
+    private PublicKey publicKey;
+
+    private PrivateKey privateKey;
 
     private SecureClient() {}
 
@@ -29,6 +36,11 @@ public class SecureClient {
             KeyGenerator gen = KeyGenerator.getInstance("AES");
             gen.init(128);
             masterKey = gen.generateKey();
+
+            KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
+            KeyPair keyPair = keyPairGen.generateKeyPair();
+            publicKey = keyPair.getPublic();
+            privateKey = keyPair.getPrivate();
         }
         catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
@@ -36,7 +48,7 @@ public class SecureClient {
     }
 
     public InsecureMessage init_session(String hostname) {
-        return Channel.createChannel(name, hostname, masterKey);
+        return Channel.createChannel(name, hostname, masterKey, publicKey, privateKey);
     }
 
     public InsecureMessage check_out(UID document_id) {

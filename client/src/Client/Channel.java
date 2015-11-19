@@ -5,9 +5,13 @@ import javax.crypto.SecretKey;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.Map;
 
+import Client.ClientCrypto;
 import Client.SecureClient.UID;
+import com.sun.corba.se.spi.activation.IIOP_CLEAR_TEXT;
 
 /**
  * A secure channel used by client
@@ -52,8 +56,8 @@ public class Channel {
             Cipher cipher = getAESCipher();
             cipher.init(Cipher.DECRYPT_MODE, key);
             // TODO
-            byte[] encrypted = cipher.doFinal(cipherText.getBytes("US-ASCII"));
-            return new String(encrypted, "US-ASCII");
+            byte[] decrypted = cipher.doFinal(cipherText.getBytes("US-ASCII"));
+            return new String(decrypted, "US-ASCII");
         }
         catch (InvalidKeyException e) {
             e.printStackTrace();
@@ -86,9 +90,10 @@ public class Channel {
         catch (Exception e) { return null; }
     }
 
-    public static InsecureMessage createChannel(UID clientName, String hostname, SecretKey masterKey) {
+    public static InsecureMessage createChannel(UID clientName, String hostname, SecretKey masterKey, PublicKey publicKey, PrivateKey privateKey) {
         InsecureClient _client = new InsecureClient(discover(hostname));
 
+        _client.send("init","\"phase\":1");
         // TODO: symmetric key to channel encryption
         SecretKey key = null;
 
