@@ -56,14 +56,14 @@ public class SecureClient {
     }
 
     public InsecureMessage check_in(UID document_id, String document, SecurityFlag flag) {
-        return Channel.send(name, "checkin", "{\"uid\":\"" + document_id + "\"}\"," +
+        return Channel.send(name, "checkin", "{\"uid\":\"" + document_id + "\"," +
                                              "\"document\":\"" + document + "\"," +
                                              "\"flag\":" + flag + "}");
     }
 
     public InsecureMessage delegate(UID document_id, SecureClient c, int time,
                                     Permission p, boolean propagationFlag) {
-        return Channel.send(name, "delegate", "{\"uid\":\"" + document_id + "\"}\"," +
+        return Channel.send(name, "delegate", "{\"uid\":\"" + document_id + "\"," +
                                               "\"client\":\"" + c.getName() + "\"," +
                                               "\"time\":" + time + "," +
                                               "\"permission\":" + p + "," +

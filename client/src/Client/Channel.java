@@ -12,6 +12,7 @@ import java.util.Map;
 import Client.ClientCrypto;
 import Client.SecureClient.UID;
 import com.sun.corba.se.spi.activation.IIOP_CLEAR_TEXT;
+import com.google.gson.Gson;
 
 /**
  * A secure channel used by client
@@ -49,6 +50,10 @@ public class Channel {
             e.printStackTrace();
             return "";
         }
+        catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private String decrypt(String cipherText) {
@@ -66,6 +71,10 @@ public class Channel {
         catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             return "";
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -93,7 +102,16 @@ public class Channel {
     public static InsecureMessage createChannel(UID clientName, String hostname, SecretKey masterKey, PublicKey publicKey, PrivateKey privateKey) {
         InsecureClient _client = new InsecureClient(discover(hostname));
 
-        _client.send("init","\"phase\":1");
+        //Phase 1
+        String response1 = _client.send("init", "{\"phase\":1,\"message\":" + publicKey.toString() + "\"," +
+                "\"signature\":\"" + "" + "\"," + "\"certificate\":\"" + "" +"\"}");
+
+        Gson gson = new Gson();
+        Map<String, String> map;
+        Map<String, String> map1 = gson.fromJson(response1, map.getClass());
+        String message1 = map1.get("message");
+//        PublicKey serverPublicKey =
+        SecretKey clientKey = ClientCrypto.GenerateAESKey(128);
         // TODO: symmetric key to channel encryption
         SecretKey key = null;
 
@@ -101,7 +119,7 @@ public class Channel {
         String identifier = null;
 
         // TODO: put a new Channel in the map
-        channels.put(clientName, new Channel(key, identifier, _client));
+        // channels.put(clientName, new Channel(key, identifier, _client));
 
         //Message result = Message.newMessage();
         // TODO

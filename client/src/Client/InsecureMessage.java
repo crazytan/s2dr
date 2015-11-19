@@ -51,11 +51,11 @@ public class InsecureMessage {
         System.out.println(m);
         System.out.println(m.isSuccess());
         System.out.println(m.getMessage());*/
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, String> map;
         map.put("signature", "123");
         map.put("certificate", "{\"signature\":\"456\"}");
         System.out.println(gson.toJson(map));
-        Map<String, Object> _map = gson.fromJson(gson.toJson(map), map.getClass());
+        Map<String, String> _map = gson.fromJson(gson.toJson(map), new HashMap<String, String>().getClass());
         System.out.println(_map);
     }
 }
