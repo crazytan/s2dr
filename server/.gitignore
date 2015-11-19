@@ -1,2 +1,5 @@
 # WebStorm folder
 .idea/
+
+# database folder
+data/
