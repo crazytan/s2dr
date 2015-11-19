@@ -7,7 +7,7 @@ var crypto = require('../lib/cryptoLib');
 var router = express.Router();
 
 router.post('/', function(req, res, next) {
-    db.getKey(req.body.identifier, function (err, key) {
+    db.getKey(req.body.identifier, function (err, channel) {
         if (err) {
             res.json({
                 result: 1,
@@ -15,10 +15,10 @@ router.post('/', function(req, res, next) {
                 message: 'invalid identifier!'
             });
         }
-        var plainText = crypto.decryptAES(req.body.message, key.key);
-        var message = JSON.parse(plainText);
-        message.name = key.client;
-        next(message);
+        var plainText = crypto.decryptAES(req.body.message, channel.key);
+        req.s2dr.message = JSON.parse(plainText);
+        req.s2dr.channel = channel;
+        next();
     });
 });
 

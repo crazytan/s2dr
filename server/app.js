@@ -4,6 +4,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var decrypt = require('./routes/decrypt');
+var encrypt = require('./routes/encrypt');
 
 var app = express();
 
@@ -12,11 +13,11 @@ app.use(bodyParser.json());
 
 // set up routers for client calls
 app.use('/init', require('./routes/init'));
-app.use('/checkout', decrypt, require('./routes/checkout'));
-app.use('/checkin', decrypt, require('./routes/checkin'));
-app.use('/delegate', decrypt, require('./routes/delegate'));
-app.use('/delete', decrypt, require('./routes/delete'));
-app.use('/terminate', decrypt, require('./routes/terminate'));
+app.use('/checkout', decrypt, require('./routes/checkout'), encrypt);
+app.use('/checkin', decrypt, require('./routes/checkin'), encrypt);
+app.use('/delegate', decrypt, require('./routes/delegate'), encrypt);
+app.use('/delete', decrypt, require('./routes/delete'), encrypt);
+app.use('/terminate', decrypt, require('./routes/terminate'), encrypt);
 
 // catch 404 and return error message
 app.use(function(req, res, next) {

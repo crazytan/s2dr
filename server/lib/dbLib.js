@@ -7,7 +7,7 @@ var client = require('mongodb').MongoClient;
 exports.getKey = function (identifier, callback) {
     client.connect('mongodb://localhost:' + port + '/s2dr', function (err, db) {
         if (err) callback(err, null);
-        db.collection('keys').find({identifier: identifier}).toArray(function (err, items) {
+        db.collection('keys').find({clientID: identifier}).toArray(function (err, items) {
             if (err) callback(err, null);
             if (items.length != 1) callback(err, null);
             callback(null, items[0]);
