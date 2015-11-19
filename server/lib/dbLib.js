@@ -30,3 +30,7 @@ exports.getMeta = function (uid, callback) {
 exports.deleteMeta = function (uid, callback) {
 
 };
+
+exports.deleteChannel = function (identifier, callback) {
+
+};
