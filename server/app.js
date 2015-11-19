@@ -16,10 +16,12 @@ var decrypt = express.Router().post('/', function(req, res) {
                 message: 'invalid identifier!'
             });
         }
-        var plainText = crypto.decryptAES(req.body.message, channel.key);
-        req.s2dr.message = JSON.parse(plainText);
-        req.s2dr.channel = channel;
-        next();
+        else {
+            var plainText = crypto.decryptAES(req.body.message, channel.key);
+            req.s2dr.message = JSON.parse(plainText);
+            req.s2dr.channel = channel;
+            next();
+        }
     });
 });
 

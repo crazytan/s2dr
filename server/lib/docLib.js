@@ -17,3 +17,15 @@ exports.checkPermit = function (acl, client, operation) {
 exports.getDoc = function (meta, callback) {
     // TODO: file operation
 };
+
+exports.addDoc = function (channel, message, callback) {
+
+};
+
+exports.updateDoc = function (channel, message, callback) {
+
+};
+
+exports.deleteDoc = function (uid, callback) {
+
+};
