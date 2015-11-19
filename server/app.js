@@ -3,8 +3,36 @@
  */
 var express = require('express');
 var bodyParser = require('body-parser');
-var decrypt = require('./routes/decrypt');
-var encrypt = require('./routes/encrypt');
+var db = require('./lib/dbLib');
+var crypto = require('./lib/cryptoLib');
+
+// middleware for decrypting incoming messages
+var decrypt = express.Router().post('/', function(req, res) {
+    db.getChannel(req.body.identifier, function (err, channel) {
+        if (err) {
+            res.json({
+                result: 1,
+                identifier: null,
+                message: 'invalid identifier!'
+            });
+        }
+        var plainText = crypto.decryptAES(req.body.message, channel.key);
+        req.s2dr.message = JSON.parse(plainText);
+        req.s2dr.channel = channel;
+        next();
+    });
+});
+
+// middleware for encrypting outgoing messages
+var encrypt = express.Router().post('/', function(req, res) {
+    var plainText = JSON.stringify(req.s2dr.response);
+    var cipherText = crypto.encryptAES(plainText, req.s2dr.channel.key);
+    res.json({
+        result: 0,
+        identifier: req.s2dr.channel.myID,
+        message: cipherText
+    });
+});
 
 var app = express();
 
