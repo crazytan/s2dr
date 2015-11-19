@@ -16,6 +16,20 @@ getDocument = function (collectionName, property, callback) {
                 }
             });
         }
+        db.close();
+    });
+};
+
+insertDocument = function (collectionName, object, callback) {
+    client.connect('mongodb://localhost:' + port + '/s2dr', function (err, db) {
+        if (err) callback(err);
+        else {
+            db.collection(collectionName).insertOne(object, function (err, result) {
+                if (err) callback(err);
+                else callback(null);
+            });
+        }
+        db.close();
     });
 };
 
@@ -28,6 +42,7 @@ deleteDocument = function (collectionName, property, callback) {
                 else callback(null);
             });
         }
+        db.close();
     });
 };
 
@@ -37,6 +52,10 @@ exports.getChannel = function (identifier, callback) {
 
 exports.getMeta = function (uid, callback) {
     getDocument('meta', {UID: uid}, callback);
+};
+
+exports.insertMeta = function (meta, callback) {
+    insertDocument('meta', meta, callback);
 };
 
 exports.deleteMeta = function (uid, callback) {

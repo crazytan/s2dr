@@ -1,5 +1,5 @@
 /*
- * check if an ACL permits a specific operation from a client
+ * document library for getting, deleting and updating documents and metadata
  */
 var fs = require('fs');
 var db = require('../lib/dbLib');
@@ -72,11 +72,78 @@ exports.getDoc = function (meta, callback) {
 };
 
 exports.addDoc = function (channel, message, callback) {
-    // TODO: maintain metadata
-    fs.writeFile('../docs/' + message.uid, message.document, function (err) {
-        if (err) callback(err);
-        else callback(null);
-    });
+    var path = '../docs/' + message.uid;
+    var meta = {
+        UID: message.uid,
+        flag: message.flag,
+        signature: '',
+        key: '',
+        acl: [{
+            name: channel.client,
+            timestamp: new Date(),
+            lifetime: -1,
+            signature: '',
+            permission: 3,
+            propagation: true
+        }]
+    };
+    if (message.flag == this.secFlag.none) {
+        db.insertMeta(meta, function (err) {
+            if (err) callback(err);
+            else {
+                fs.writeFile(path, message.document, function (err) {
+                    callback(err);
+                });
+            }
+        });
+    }
+    else if (message.flag == this.secFlag.integrity) {
+        var key = crypto.generateAESKey();
+        var signature = crypto.hash(message.document);
+        var encryptedSignature = crypto.encryptAES(signature, key);
+        var encryptedKey = crypto.encryptKey(key);
+        meta.signature = encryptedSignature;
+        meta.key = encryptedKey;
+        db.insertMeta(meta, function (err) {
+            if (err) callback(err);
+            else {
+                fs.writeFile(path, message.document, function (err) {
+                    callback(err);
+                });
+            }
+        });
+    }
+    else if (message.flag == this.secFlag.confidentiality) {
+        var key = crypto.generateAESKey();
+        var encryptedKey = crypto.encryptKey(key);
+        var cipherText = crypto.encryptAES(message.document, key);
+        meta.key = encryptedKey;
+        db.insertMeta(meta, function (err) {
+            if (err) callback(err);
+            else {
+                fs.writeFile(path, cipherText, function (err) {
+                    callback(err);
+                });
+            }
+        });
+    }
+    else {
+        var key = crypto.generateAESKey();
+        var signature = crypto.hash(message.document);
+        var encryptedSignature = crypto.encryptAES(signature, key);
+        var encryptedKey = crypto.encryptKey(key);
+        var cipherText = crypto.encryptAES(message.document, key);
+        meta.key = encryptedKey;
+        meta.signature = encryptedSignature;
+        db.insertMeta(meta, function (err) {
+            if (err) callback(err);
+            else {
+                fs.writeFile(path, cipherText, function (err) {
+                    callback(err);
+                });
+            }
+        });
+    }
 };
 
 exports.updateDoc = function (channel, message, callback) {

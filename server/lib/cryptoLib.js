@@ -21,3 +21,7 @@ exports.encryptKey = function (key) {
 exports.hash = function (m) {
 
 };
+
+exports.generateAESKey = function () {
+
+};
