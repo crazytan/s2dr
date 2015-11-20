@@ -16,7 +16,7 @@ router.post('/', function(req, res, next) {
             var ifPermit = doc.checkPermit(meta.acl, req.s2dr.channel.client, doc.opEnum.owner);
             if (!ifPermit) {
                 response.result = 1;
-                response.message = 'permission denied!';
+                response.message = 'unable to delete: permission denied!';
                 next();
             }
             else {

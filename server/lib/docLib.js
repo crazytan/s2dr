@@ -19,9 +19,33 @@ exports.secFlag = {
     both: 3
 };
 
-exports.checkPermit = function (acl, client, operation) {
-    // TODO: implement acl algorithm
+filterExpired = function (acl) {
+    var now = Date.now();
+    var _acl = [];
+    for (var i = 0;i < acl.length;i++) {
+        var elapsed = (now - acl[i].timestamp) / 1000.0;
+        if (elapsed < acl[i].lifetime) {
+            _acl.push(acl[i]);
+        }
+    }
+};
 
+contains = function (permission, operation) {
+    if (permission == this.opEnum.owner) return true;
+    if (operation == this.opEnum.owner) return false;
+    if (permission == this.opEnum.both) return true;
+    if (permission == operation) return true;
+    return false;
+};
+
+exports.checkPermit = function (acl, client, operation) {
+    var acl = filterExpired(acl);
+    for (var i = 0;i < acl.length;i++) {
+        if ((acl[i].name === client) && contains(acl[i].permission, operation)) {
+            return true;
+        }
+    }
+    return false;
 };
 
 exports.checkDelegate = function (message, meta, callback) {
