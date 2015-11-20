@@ -1,11 +1,17 @@
 package Client;
 
 import sun.lwawt.macosx.CImage;
+import sun.security.util.SecurityConstants;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.InterruptedIOException;
 import java.security.*;
+import java.sql.SQLSyntaxErrorException;
 
 /*
  * A class representing the client side of s2dr service.
@@ -21,11 +27,27 @@ public class SecureClient {
 
     private PrivateKey privateKey;
 
-    private SecureClient() {}
-
-    public UID getName() {
-        return name;
+    public enum Permission {
+        checkin, checkout, both, owner
     }
+
+    public enum SecurityFlag {
+        none, confidentiality, integrity, both
+    }
+
+    public final class UID {
+        public String id;
+
+        public UID(String id) {
+            this.id = id;
+        }
+
+        public String toString() {
+            return id;
+        }
+    }
+
+    private SecureClient() {}
 
     public SecureClient(String name) {
 
@@ -45,6 +67,10 @@ public class SecureClient {
         catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
+    }
+
+    public UID getName() {
+        return name;
     }
 
     public InsecureMessage init_session(String hostname) {
@@ -85,28 +111,67 @@ public class SecureClient {
         }
     };
 
-    public enum Permission {
-        checkin, checkout, both, owner
+    private static void prompt() {
+        System.out.print("> ");
     }
 
-    public enum SecurityFlag {
-        none, confidentiality, integrity, both
+    private static void printHelp() {
+        System.out.println("Operations: init, checkout, checkin, delegate, delete, terminate");
     }
 
-    public final class UID {
-        public String id;
+    private UID generateUID(String uid) {
+        return new UID(uid);
+    }
 
-        public UID(String id) {
-            this.id = id;
+    private static SecurityFlag generateFlag(String flag) {
+        int _flag = Integer.parseInt(flag);
+        if (_flag == 0) return SecurityFlag.none;
+        if (_flag == 1) return SecurityFlag.confidentiality;
+        if (_flag == 2) return SecurityFlag.integrity;
+        return SecurityFlag.both;
+    }
+
+    private static Permission generatePermission(String p) {
+        int _p = Integer.parseInt(p);
+        if (_p == 0) return Permission.checkin;
+        if (_p == 1) return Permission.checkout;
+        if (_p == 2) return Permission.both;
+        return Permission.owner;
+    }
+
+    public static void main(String[] args) throws IOException {
+        System.out.println("*** a client for s2dr ***");
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        SecureClient.prompt();
+        System.out.print("enter the client name: ");
+        SecureClient client = new SecureClient(in.readLine().trim());
+        while (true) {
+            SecureClient.prompt();
+            String[] commands = in.readLine().trim().split(" ");
+            InsecureMessage message = null;
+            if (commands[0].isEmpty()) continue;
+            if (commands[0].equals("help")) SecureClient.printHelp();
+            if (commands[0].equals("exit")) break;
+            if (commands[0].equals("init"))
+                message = client.init_session("server");
+            if (commands[0].equals("checkout"))
+                message = client.check_out(client.generateUID(commands[1]));
+            if (commands[0].equals("checkin"))
+                message = client.check_in(client.generateUID(commands[1]), commands[2], SecureClient.generateFlag(commands[3]));
+            if (commands[0].equals("delegate"))
+                message = client.delegate(client.generateUID(commands[1]),
+                        commands[2].equals("all")?SecureClient.All:new SecureClient(commands[2]),
+                        Integer.parseInt(commands[3]),
+                        SecureClient.generatePermission(commands[4]),
+                        commands[5].equals("true"));
+            if (commands[0].equals("delete"))
+                message = client.safe_delete(client.generateUID(commands[1]));
+            if (commands[0].equals("terminate"))
+                message = client.terminate();
+            if (message.isSuccess())
+                System.out.println("operation successful!");
+            else
+                System.out.println(message.getMessage());
         }
-
-        public String toString() {
-            return id;
-        }
-    }
-
-    public static void main(String[] args) {
-        SecureClient c = new SecureClient("tan");
-        System.out.println(SecureClient.All.getName());
     }
 }
