@@ -151,5 +151,7 @@ exports.updateDoc = function (channel, message, callback) {
 };
 
 exports.deleteDoc = function (uid, callback) {
-
+    fs.unlink('../docs/' + uid, function (err) {
+        callback();
+    });
 };
