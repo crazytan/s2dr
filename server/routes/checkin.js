@@ -35,7 +35,7 @@ router.post('/', function(req, res, next) {
                     next();
                 }
                 else {
-                    doc.updateDoc(req.s2dr.channel, req.s2dr.message, function (err) {
+                    doc.updateDoc(req.s2dr.channel, req.s2dr.message, meta, function (err) {
                         if (err) {
                             response.result = 1;
                             response.message = 'unable to update the document!';

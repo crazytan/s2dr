@@ -20,13 +20,17 @@ getDocument = function (collectionName, property, callback) {
     });
 };
 
-insertDocument = function (collectionName, object, callback) {
+upsertMeta = function (collectionName, object, callback) {
     client.connect('mongodb://localhost:' + port + '/s2dr', function (err, db) {
         if (err) callback(err);
         else {
-            db.collection(collectionName).insertOne(object, function (err, result) {
-                if (err) callback(err);
-                else callback(null);
+            db.collection(collectionName).updateOne(
+                {UID:object.uid},
+                object,
+                {upsert:true, w:1},
+                function (err, result) {
+                    if (err) callback(err);
+                    else callback(null);
             });
         }
         db.close();
@@ -54,8 +58,8 @@ exports.getMeta = function (uid, callback) {
     getDocument('meta', {UID: uid}, callback);
 };
 
-exports.insertMeta = function (meta, callback) {
-    insertDocument('meta', meta, callback);
+exports.upsertMeta = function (meta, callback) {
+    upsertMeta('meta', meta, callback);
 };
 
 exports.deleteMeta = function (uid, callback) {

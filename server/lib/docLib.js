@@ -21,6 +21,7 @@ exports.secFlag = {
 
 exports.checkPermit = function (acl, client, operation) {
     // TODO: implement acl algorithm
+
 };
 
 exports.checkDelegate = function (message, meta, callback) {
@@ -72,12 +73,11 @@ exports.getDoc = function (meta, callback) {
 };
 
 exports.addDoc = function (channel, message, callback) {
-    var path = '../docs/' + message.uid;
     var meta = {
         UID: message.uid,
-        flag: message.flag,
+        /*flag: message.flag,
         signature: '',
-        key: '',
+        key: '',*/
         acl: [{
             name: channel.client,
             timestamp: new Date(),
@@ -87,8 +87,16 @@ exports.addDoc = function (channel, message, callback) {
             propagation: true
         }]
     };
+    this.updateDoc(channel, message, meta, callback);
+};
+
+exports.updateDoc = function (channel, message, meta, callback) {
+    var path = '../docs/' + message.uid;
+    meta.flag = message.flag;
+    meta.signature =  '';
+    meta.key = '';
     if (message.flag == this.secFlag.none) {
-        db.insertMeta(meta, function (err) {
+        db.upsertMeta(meta, function (err) {
             if (err) callback(err);
             else {
                 fs.writeFile(path, message.document, function (err) {
@@ -104,7 +112,7 @@ exports.addDoc = function (channel, message, callback) {
         var encryptedKey = crypto.encryptKey(key);
         meta.signature = encryptedSignature;
         meta.key = encryptedKey;
-        db.insertMeta(meta, function (err) {
+        db.upsertMeta(meta, function (err) {
             if (err) callback(err);
             else {
                 fs.writeFile(path, message.document, function (err) {
@@ -118,7 +126,7 @@ exports.addDoc = function (channel, message, callback) {
         var encryptedKey = crypto.encryptKey(key);
         var cipherText = crypto.encryptAES(message.document, key);
         meta.key = encryptedKey;
-        db.insertMeta(meta, function (err) {
+        db.upsertMeta(meta, function (err) {
             if (err) callback(err);
             else {
                 fs.writeFile(path, cipherText, function (err) {
@@ -135,7 +143,7 @@ exports.addDoc = function (channel, message, callback) {
         var cipherText = crypto.encryptAES(message.document, key);
         meta.key = encryptedKey;
         meta.signature = encryptedSignature;
-        db.insertMeta(meta, function (err) {
+        db.upsertMeta(meta, function (err) {
             if (err) callback(err);
             else {
                 fs.writeFile(path, cipherText, function (err) {
@@ -144,10 +152,6 @@ exports.addDoc = function (channel, message, callback) {
             }
         });
     }
-};
-
-exports.updateDoc = function (channel, message, callback) {
-
 };
 
 exports.deleteDoc = function (uid, callback) {
