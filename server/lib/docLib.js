@@ -28,14 +28,14 @@ filterExpired = function (acl) {
             _acl.push(acl[i]);
         }
     }
+    return _acl;
 };
 
 contains = function (permission, operation) {
     if (permission == this.opEnum.owner) return true;
     if (operation == this.opEnum.owner) return false;
     if (permission == this.opEnum.both) return true;
-    if (permission == operation) return true;
-    return false;
+    return (permission == operation);
 };
 
 exports.checkPermit = function (acl, client, operation) {
