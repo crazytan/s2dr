@@ -1,5 +1,6 @@
 var express = require('express');
 var db = require('../lib/dbLib');
+var doc = require('../lib/docLib');
 var router = express.Router();
 
 router.post('/', function(req, res, next) {
@@ -12,17 +13,24 @@ router.post('/', function(req, res, next) {
             next();
         }
         else {
-            doc.checkDelegate(req.s2dr.message, meta, function (err, entry) {
+            doc.checkDelegate(req.s2dr.message, meta.acl, function (err, entry) {
                 if (err) {
                     response.result = 1;
                     response.message = 'unable to delegate: permission denied!';
                     next();
                 }
                 else {
-                    db.delegate(req.s2dr.message, entry, function () {
-                        response.result = 0;
-                        response.message = '';
-                        next();
+                    db.delegate(req.s2dr.message, meta.acl, ace, function (err) {
+                        if (err) {
+                            response.result = 1;
+                            response.message = 'unable to delegate: db operation failed!';
+                            next();
+                        }
+                        else {
+                            response.result = 0;
+                            response.message = '';
+                            next();
+                        }
                     });
                 }
             });

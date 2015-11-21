@@ -19,18 +19,25 @@ exports.secFlag = {
     both: 3
 };
 
+// filter expired ace
 filterExpired = function (acl) {
     var now = Date.now();
     var _acl = [];
     for (var i = 0;i < acl.length;i++) {
-        var elapsed = (now - acl[i].timestamp) / 1000.0;
-        if (elapsed < acl[i].lifetime) {
+        if (acl[i].lifetime < 0) {
             _acl.push(acl[i]);
+        }
+        else {
+            var elapsed = (now - acl[i].timestamp) / 1000.0;
+            if (elapsed < acl[i].lifetime) {
+                _acl.push(acl[i]);
+            }
         }
     }
     return _acl;
 };
 
+// check if permission grants operation
 contains = function (permission, operation) {
     if (permission == this.opEnum.owner) return true;
     if (operation == this.opEnum.owner) return false;
@@ -39,21 +46,28 @@ contains = function (permission, operation) {
 };
 
 exports.checkPermit = function (acl, client, operation) {
-    var acl = filterExpired(acl);
-    for (var i = 0;i < acl.length;i++) {
-        if ((acl[i].name === client) && contains(acl[i].permission, operation)) {
+    var _acl = filterExpired(acl);
+    for (var i = 0;i < _acl.length;i++) {
+        if ((_acl[i].name === client) && contains(_acl[i].permission, operation)) {
             return true;
         }
     }
     return false;
 };
 
-exports.checkDelegate = function (message, meta, callback) {
-
+exports.checkDelegate = function (message, acl, callback) {
+    var _acl = filterExpired(acl);
+    for (var i = 0;i < _acl.length;i++) {
+        if ((_acl[i].name === message.client) && contains(_acl[i].permission, message.permission) && _acl[i].propagation) {
+            callback(null, _acl[i]);
+        }
+    }
+    callback(new Error(), null);
 };
 
 exports.getDoc = function (meta, callback) {
     var path = '../docs/' + meta.UID;
+    var key = crypto.decryptKey(meta.key);
     if (meta.flag == this.secFlag.none) {
         fs.readFile(path, function (err, data) {
             if (err) callback(err, null);
@@ -61,7 +75,6 @@ exports.getDoc = function (meta, callback) {
         });
     }
     else if (meta.flag == this.secFlag.confidentiality) {
-        var key = crypto.decryptKey(meta.key);
         fs.readFile(path, function (err, data) {
             if (err) callback(err, null);
             else {
@@ -70,7 +83,6 @@ exports.getDoc = function (meta, callback) {
         });
     }
     else if (meta.flag == this.secFlag.integrity) {
-        var key = crypto.decryptKey(meta.key);
         var decryptedSignature = crypto.decryptAES(meta.signature, key);
         fs.readFile(path, function (err, data) {
             if (err) callback(err, null);
@@ -82,7 +94,6 @@ exports.getDoc = function (meta, callback) {
         });
     }
     else {
-        var key = crypto.decryptKey(meta.key);
         var decryptedSignature = crypto.decryptAES(meta.signature, key);
         fs.readFile(path, function (err, data) {
             if (err) callback(err, null);
