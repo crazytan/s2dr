@@ -15,7 +15,7 @@ exports.decryptAES = function (m, key) {
 
 // return encrypted string in HEX
 exports.encryptAES = function (m, key) {
-    var cipher = crypto.createCipher(aesAlgorithm, key.toString('binary'));
+    var cipher = crypto.createDecipher(aesAlgorithm, key.toString('binary'));
     var encrypted = cipher.update(m.toString('hex'), 'hex', 'hex');
     encrypted += cipher.final('hex');
     return encrypted;
