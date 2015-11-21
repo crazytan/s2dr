@@ -30,7 +30,9 @@ exports.encryptKey = function (key) {
 };
 
 exports.hash = function (m) {
-// TODO
+    var shasum = crypto.createHash('sha256');
+    shasum.update(m.toString('binary'), 'binary');
+    return shasum.digest('hex');
 };
 
 exports.generateAESKey = function () {
