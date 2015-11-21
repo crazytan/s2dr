@@ -1,10 +1,11 @@
 /*
- *  nodejs server for secure shared document repository
+ *  node.js server for secure shared document repository
  */
 var express = require('express');
 var bodyParser = require('body-parser');
 var db = require('./lib/dbLib');
 var crypto = require('./lib/cryptoLib');
+crypto.init();
 
 // middleware for decrypting incoming messages
 var decrypt = express.Router().post('/', function(req, res) {
