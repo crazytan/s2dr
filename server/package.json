@@ -11,6 +11,7 @@
     "body-parser": "~1.14.1",
     "mongodb": "~2.0.48",
     "kerberos": "~0.0.17",
-    "mongo-express": "~0.27.1"
+    "mongo-express": "~0.27.1",
+    "node-rsa": "~0.2.26"
   }
 }

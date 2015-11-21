@@ -6,3 +6,6 @@ data/
 
 # document folder
 docs/
+
+# nodejs modules
+node_modules/
