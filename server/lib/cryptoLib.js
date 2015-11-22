@@ -7,10 +7,13 @@ var crypto = require('crypto'),
     ifInit = false, // if CA is set up
     CAPublic = new NodeRSA(), // CA's public key
     CAPrivate = new NodeRSA(), // CA's private key
-    masterKey = ''; // master key
+    myPrivate = new NodeRSA({b: 2048}), // server's private key
+    masterKey = '', // master key
+    certificate = {}; // server's certificate
 
 const aesKeyLen = 256,  // # of bits of AES key
       aesAlgorithm = 'aes-256-ctr',
+      hashAlgorithm = 'sha256',
       CAPublicPath = '../CA.pub', // path of CA's public key
       CAPrivatePath = '../CA'; // path of CA's private key
 
@@ -25,7 +28,21 @@ exports.init = function () {
     var privateBuf = fs.readFileSync(CAPrivatePath);
     CAPrivate.importKey(privateBuf, 'pkcs1-private');
 
+    // generate master key
     masterKey = this.generateAESKey();
+
+    // make the certificate valid for one year
+    var date = new Date();
+    date.setFullYear(date.getFullYear() + 1);
+
+    var myPublicStr = myPrivate.exportKey('pkcs1-public');
+    // generate certificate
+    certificate = {
+        subject: 's2dr-server',
+        validto: date.toDateString(),
+        publickey: myPublicStr,
+        signature: CAPrivate.sign(myPublicStr, 'hex', 'utf8')
+    };
     ifInit = true;
 };
 
@@ -68,7 +85,7 @@ exports.encryptKey = function (key) {
 };
 
 exports.hash = function (m) {
-    var shasum = crypto.createHash('sha256');
+    var shasum = crypto.createHash(hashAlgorithm);
     shasum.update(m.toString('binary'), 'binary');
     return shasum.digest('hex');
 };
