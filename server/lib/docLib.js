@@ -76,7 +76,7 @@ exports.checkDelegate = function (message, acl, callback) {
 };
 
 exports.getDoc = function (meta, callback) {
-    var path = '../docs/' + meta.UID;
+    var path = './docs/' + meta.UID;
     var key = crypto.decryptKey(meta.key);
     if (meta.flag == this.secFlag.none) {
         fs.readFile(path, function (err, data) {
@@ -136,7 +136,7 @@ exports.addDoc = function (channel, message, callback) {
 };
 
 exports.updateDoc = function (channel, message, meta, callback) {
-    var path = '../docs/' + message.uid;
+    var path = './docs/' + message.uid;
     meta.flag = message.flag;
     meta.signature =  '';
     meta.key = '';
@@ -200,7 +200,7 @@ exports.updateDoc = function (channel, message, meta, callback) {
 };
 
 exports.deleteDoc = function (uid, callback) {
-    fs.unlink('../docs/' + uid, function (err) {
+    fs.unlink('./docs/' + uid, function (err) {
         callback();
     });
 };
