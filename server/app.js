@@ -11,6 +11,12 @@ crypto.init();
 var decrypt = express.Router().post('/', function(req, res, next) {
     req.s2dr = {};
     req.s2dr.message = JSON.parse(req.body.message);
+    req.s2dr.channel = {
+        clientID: 'soifwje',
+        myId: 'asoidjw',
+        key: 'joi2n123joi',
+        client: 'tan'
+    };
     next();
     /*db.getChannel(req.body.identifier, function (err, channel) {
         if (err) {

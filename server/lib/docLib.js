@@ -45,6 +45,16 @@ contains = function (permission, operation) {
     return (permission == operation);
 };
 
+exports.ifNew = function (uid) {
+    try {
+        var stat = fs.statSync('../docs/' + uid);
+        return false;
+    }
+    catch (e) {
+        return true;
+    }
+};
+
 exports.checkPermit = function (acl, client, operation) {
     var _acl = filterExpired(acl);
     for (var i = 0;i < _acl.length;i++) {

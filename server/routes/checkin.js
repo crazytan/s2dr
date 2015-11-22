@@ -11,7 +11,7 @@ router.post('/', function(req, res, next) {
         doc.addDoc(req.s2dr.channel, req.s2dr.message, function (err) {
             if (err) {
                 response.result = 1;
-                response.message = 'unable to add new document!';
+                response.message = 'unable to add new document';
                 next();
             }
             else {

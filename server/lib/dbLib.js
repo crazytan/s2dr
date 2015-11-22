@@ -9,6 +9,7 @@ getDocument = function (collectionName, property, callback) {
         if (err) callback(err, null);
         else {
             db.collection(collectionName).find(property).toArray(function (err, items) {
+                db.close();
                 if (err) callback(err, null);
                 else {
                     if (items.length != 1) callback(new Error(), null);
@@ -16,25 +17,31 @@ getDocument = function (collectionName, property, callback) {
                 }
             });
         }
-        db.close();
     });
 };
 
-upsertMeta = function (object, callback) {
+updateOneMeta = function (db, meta, callback) {
+    db.collection('meta').updateOne(
+        {"UID":meta.uid},
+        meta,
+        {upsert:true, w:1},
+        function (err, result) {
+            if (err) callback(err);
+            else callback(null);
+        }
+    );
+};
+
+upsertMeta = function (meta, callback) {
     client.connect('mongodb://localhost:' + port + '/s2dr', function (err, db) {
         if (err) callback(err);
         else {
-            db.collection('meta').updateOne(
-                {UID:object.uid},
-                object,
-                {upsert:true, w:1},
-                function (err, result) {
-                    if (err) callback(err);
-                    else callback(null);
-                }
-            );
+            updateOneMeta(db, meta, function (err) {
+                db.close();
+                if (err) callback(err);
+                else callback(null);
+            });
         }
-        db.close();
     });
 };
 
@@ -43,11 +50,11 @@ deleteDocument = function (collectionName, property, callback) {
         if (err) callback(err);
         else {
             db.collection(collectionName).deleteMany(property, {w:1}, function (err, result) {
+                db.close();
                 if (err) callback(err);
                 else callback(null);
             });
         }
-        db.close();
     });
 };
 
@@ -56,10 +63,11 @@ insertACE = function (uid, newAcl, callback) {
         if (err) callback(err);
         else {
             db.collection('meta').updateOne(
-                {UID:uid},
-                {$set: {acl:newAcl}},
+                {"UID":uid},
+                {$set: {"acl":newAcl}},
                 {w:1},
                 function (err, result) {
+                    db.close();
                     if (err) callback(err);
                     else callback(null);
                 }
