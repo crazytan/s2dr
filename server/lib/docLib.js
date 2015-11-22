@@ -89,7 +89,7 @@ exports.getDoc = function (meta, callback) {
         });
     }
     else if (meta.flag == this.secFlag.confidentiality) {
-        fs.readFile(path, function (err, data) {
+        fs.readFile(path, {encoding:'hex'}, function (err, data) {
             if (err) callback(err, null);
             else {
                 callback(null, crypto.decryptAES(data, key));
@@ -98,7 +98,7 @@ exports.getDoc = function (meta, callback) {
     }
     else if (meta.flag == this.secFlag.integrity) {
         var decryptedSignature = crypto.decryptAES(meta.signature, key);
-        fs.readFile(path, function (err, data) {
+        fs.readFile(path, {encoding:'hex'}, function (err, data) {
             if (err) callback(err, null);
             else {
                 var signature = crypto.hash(data);
@@ -109,7 +109,7 @@ exports.getDoc = function (meta, callback) {
     }
     else {
         var decryptedSignature = crypto.decryptAES(meta.signature, key);
-        fs.readFile(path, function (err, data) {
+        fs.readFile(path, {encoding:'hex'}, function (err, data) {
             if (err) callback(err, null);
             else {
                 var plainText = crypto.decryptAES(data, key);
@@ -157,7 +157,7 @@ exports.addDoc = function (channel, message, callback) {
         db.insertMeta(meta, function (err) {
             if (err) callback(err);
             else {
-                fs.writeFile(path, message.document, function (err) {
+                fs.writeFile(path, message.document, {encoding:'hex'}, function (err) {
                     callback(err);
                 });
             }
@@ -171,7 +171,7 @@ exports.addDoc = function (channel, message, callback) {
         db.insertMeta(meta, function (err) {
             if (err) callback(err);
             else {
-                fs.writeFile(path, cipherText, function (err) {
+                fs.writeFile(path, cipherText, {encoding:'hex'}, function (err) {
                     callback(err);
                 });
             }
@@ -188,7 +188,7 @@ exports.addDoc = function (channel, message, callback) {
         db.insertMeta(meta, function (err) {
             if (err) callback(err);
             else {
-                fs.writeFile(path, cipherText, function (err) {
+                fs.writeFile(path, cipherText, {encoding:'hex'}, function (err) {
                     callback(err);
                 });
             }
@@ -223,7 +223,7 @@ exports.updateDoc = function (channel, message, meta, callback) {
         db.updateMeta(meta, function (err) {
             if (err) callback(err);
             else {
-                fs.writeFile(path, message.document, function (err) {
+                fs.writeFile(path, message.document, {encoding:'hex'}, function (err) {
                     callback(err);
                 });
             }
@@ -237,7 +237,7 @@ exports.updateDoc = function (channel, message, meta, callback) {
         db.updateMeta(meta, function (err) {
             if (err) callback(err);
             else {
-                fs.writeFile(path, cipherText, function (err) {
+                fs.writeFile(path, cipherText, {encoding:'hex'}, function (err) {
                     callback(err);
                 });
             }
@@ -254,7 +254,7 @@ exports.updateDoc = function (channel, message, meta, callback) {
         db.updateMeta(meta, function (err) {
             if (err) callback(err);
             else {
-                fs.writeFile(path, cipherText, function (err) {
+                fs.writeFile(path, cipherText, {encoding:'hex'}, function (err) {
                     callback(err);
                 });
             }

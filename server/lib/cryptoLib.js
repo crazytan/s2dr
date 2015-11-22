@@ -31,7 +31,7 @@ exports.init = function () {
 
 // return decrypted string in HEX
 exports.decryptAES = function (m, key) {
-    var cipher = crypto.createDecipher(aesAlgorithm, key.toString('binary'));
+    var cipher = crypto.createDecipher(aesAlgorithm, key);
     var decrypted = cipher.update(m.toString('hex'), 'hex', 'utf8');
     decrypted += cipher.final('utf8');
     return decrypted;
@@ -39,7 +39,7 @@ exports.decryptAES = function (m, key) {
 
 // return encrypted string in HEX
 exports.encryptAES = function (m, key) {
-    var cipher = crypto.createCipher(aesAlgorithm, key.toString('binary'));
+    var cipher = crypto.createCipher(aesAlgorithm, key);
     var encrypted = cipher.update(m, 'utf8', 'hex');
     encrypted += cipher.final('hex');
     return encrypted;
@@ -50,11 +50,11 @@ exports.encryptByMaster = function (m) {
 };
 
 exports.decryptKey = function (encryptedKey) {
-    return CAPrivate.decrypt(encryptedKey.toString('base64'), 'hex');
+    return CAPrivate.decrypt(encryptedKey, 'hex');
 };
 
 exports.encryptKey = function (key) {
-    return CAPublic.encrypt(key.toString('hex'), 'hex', 'hex');
+    return CAPublic.encrypt(key, 'base64', 'hex');
 };
 
 exports.hash = function (m) {
