@@ -1,7 +1,7 @@
 /*
  * a MongoDB module for managing keys and meta-data
  */
-var port = 8889;
+const port = 8889;
 var client = require('mongodb').MongoClient;
 
 _getDocument = function (db, collectionName, property, callback) {

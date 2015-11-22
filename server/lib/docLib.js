@@ -1,9 +1,11 @@
 /*
  * document library for getting, deleting and updating documents and metadata
  */
-var fs = require('fs');
-var db = require('../lib/dbLib');
-var crypto = require('../lib/cryptoLib');
+var fs = require('fs'),
+    db = require('../lib/dbLib'),
+    crypto = require('../lib/cryptoLib');
+
+const prefix = './docs/';
 
 exports.opEnum = {
     checkIn: 0,
@@ -47,7 +49,7 @@ contains = function (permission, operation) {
 
 exports.ifNew = function (uid) {
     try {
-        var stat = fs.statSync('../docs/' + uid);
+        fs.statSync(prefix + uid);
         return false;
     }
     catch (e) {
@@ -67,16 +69,18 @@ exports.checkPermit = function (acl, client, operation) {
 
 exports.checkDelegate = function (message, acl, callback) {
     var _acl = filterExpired(acl);
+    var found = false;
     for (var i = 0;i < _acl.length;i++) {
         if ((_acl[i].name === message.client) && contains(_acl[i].permission, message.permission) && _acl[i].propagation) {
+            found = true;
             callback(null, _acl[i]);
         }
     }
-    callback(new Error(), null);
+    if (!found) callback(new Error(), null);
 };
 
 exports.getDoc = function (meta, callback) {
-    var path = './docs/' + meta.UID;
+    var path = prefix + meta.UID;
     var key = crypto.decryptKey(meta.key);
     if (meta.flag == this.secFlag.none) {
         fs.readFile(path, function (err, data) {
@@ -136,7 +140,7 @@ exports.addDoc = function (channel, message, callback) {
 };
 
 exports.updateDoc = function (channel, message, meta, callback) {
-    var path = './docs/' + message.uid;
+    var path = prefix + message.uid;
     meta.flag = message.flag;
     meta.signature =  '';
     meta.key = '';
@@ -200,7 +204,7 @@ exports.updateDoc = function (channel, message, meta, callback) {
 };
 
 exports.deleteDoc = function (uid, callback) {
-    fs.unlink('./docs/' + uid, function (err) {
+    fs.unlink(prefix + uid, function (err) {
         callback();
     });
 };
