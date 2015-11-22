@@ -39,9 +39,9 @@ filterExpired = function (acl) {
 
 // check if permission grants operation
 contains = function (permission, operation) {
-    if (permission == this.opEnum.owner) return true;
-    if (operation == this.opEnum.owner) return false;
-    if (permission == this.opEnum.both) return true;
+    if (permission == 3) return true;
+    if (operation == 3) return false;
+    if (permission == 2) return true;
     return (permission == operation);
 };
 

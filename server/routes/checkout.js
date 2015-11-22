@@ -6,7 +6,7 @@ var router = express.Router();
 router.post('/', function(req, res, next) {
     req.s2dr.response = {};
     var response = req.s2dr.response;
-    db.getMeta(req.body.uid, function (err, meta) {
+    db.getMeta(req.s2dr.message.uid, function (err, meta) {
         if (err) {
             response.result = 1;
             response.message = 'unable to get metadata!';
@@ -27,7 +27,7 @@ router.post('/', function(req, res, next) {
                         next();
                     }
                     response.result = 0;
-                    response.message = document;
+                    response.message = document.toString();
                     next();
                 });
             }
