@@ -92,13 +92,13 @@ exports.getDoc = function (meta, callback) {
         fs.readFile(path, {encoding:'hex'}, function (err, data) {
             if (err) callback(err, null);
             else {
-                callback(null, crypto.decryptAES(data, key));
+                callback(null, crypto.decryptMessage(data, key));
             }
         });
     }
     else if (meta.flag == this.secFlag.integrity) {
-        var decryptedSignature = crypto.decryptAES(meta.signature, key);
-        fs.readFile(path, {encoding:'hex'}, function (err, data) {
+        var decryptedSignature = crypto.decryptMessage(meta.signature, key);
+        fs.readFile(path, function (err, data) {
             if (err) callback(err, null);
             else {
                 var signature = crypto.hash(data);
@@ -108,11 +108,11 @@ exports.getDoc = function (meta, callback) {
         });
     }
     else {
-        var decryptedSignature = crypto.decryptAES(meta.signature, key);
+        var decryptedSignature = crypto.decryptMessage(meta.signature, key);
         fs.readFile(path, {encoding:'hex'}, function (err, data) {
             if (err) callback(err, null);
             else {
-                var plainText = crypto.decryptAES(data, key);
+                var plainText = crypto.decryptMessage(data, key);
                 var signature = crypto.hash(plainText);
                 if (signature !== decryptedSignature) callback(new Error(), null);
                 else callback(null, plainText);
@@ -150,14 +150,14 @@ exports.addDoc = function (channel, message, callback) {
     else if (message.flag == this.secFlag.integrity) {
         var key = crypto.generateAESKey();
         var signature = crypto.hash(message.document);
-        var encryptedSignature = crypto.encryptAES(signature, key);
+        var encryptedSignature = crypto.encryptMessage(signature, key);
         var encryptedKey = crypto.encryptKey(key);
         meta.signature = encryptedSignature;
         meta.key = encryptedKey;
         db.insertMeta(meta, function (err) {
             if (err) callback(err);
             else {
-                fs.writeFile(path, message.document, {encoding:'hex'}, function (err) {
+                fs.writeFile(path, message.document, function (err) {
                     callback(err);
                 });
             }
@@ -166,7 +166,7 @@ exports.addDoc = function (channel, message, callback) {
     else if (message.flag == this.secFlag.confidentiality) {
         var key = crypto.generateAESKey();
         var encryptedKey = crypto.encryptKey(key);
-        var cipherText = crypto.encryptAES(message.document, key);
+        var cipherText = crypto.encryptMessage(message.document, key);
         meta.key = encryptedKey;
         db.insertMeta(meta, function (err) {
             if (err) callback(err);
@@ -180,9 +180,9 @@ exports.addDoc = function (channel, message, callback) {
     else {
         var key = crypto.generateAESKey();
         var signature = crypto.hash(message.document);
-        var encryptedSignature = crypto.encryptAES(signature, key);
+        var encryptedSignature = crypto.encryptMessage(signature, key);
         var encryptedKey = crypto.encryptKey(key);
-        var cipherText = crypto.encryptAES(message.document, key);
+        var cipherText = crypto.encryptMessage(message.document, key);
         meta.key = encryptedKey;
         meta.signature = encryptedSignature;
         db.insertMeta(meta, function (err) {
@@ -216,14 +216,14 @@ exports.updateDoc = function (channel, message, meta, callback) {
     else if (message.flag == this.secFlag.integrity) {
         var key = crypto.generateAESKey();
         var signature = crypto.hash(message.document);
-        var encryptedSignature = crypto.encryptAES(signature, key);
+        var encryptedSignature = crypto.encryptMessage(signature, key);
         var encryptedKey = crypto.encryptKey(key);
         meta.signature = encryptedSignature;
         meta.key = encryptedKey;
         db.updateMeta(meta, function (err) {
             if (err) callback(err);
             else {
-                fs.writeFile(path, message.document, {encoding:'hex'}, function (err) {
+                fs.writeFile(path, message.document, function (err) {
                     callback(err);
                 });
             }
@@ -232,7 +232,7 @@ exports.updateDoc = function (channel, message, meta, callback) {
     else if (message.flag == this.secFlag.confidentiality) {
         var key = crypto.generateAESKey();
         var encryptedKey = crypto.encryptKey(key);
-        var cipherText = crypto.encryptAES(message.document, key);
+        var cipherText = crypto.encryptMessage(message.document, key);
         meta.key = encryptedKey;
         db.updateMeta(meta, function (err) {
             if (err) callback(err);
@@ -246,9 +246,9 @@ exports.updateDoc = function (channel, message, meta, callback) {
     else {
         var key = crypto.generateAESKey();
         var signature = crypto.hash(message.document);
-        var encryptedSignature = crypto.encryptAES(signature, key);
+        var encryptedSignature = crypto.encryptMessage(signature, key);
         var encryptedKey = crypto.encryptKey(key);
-        var cipherText = crypto.encryptAES(message.document, key);
+        var cipherText = crypto.encryptMessage(message.document, key);
         meta.key = encryptedKey;
         meta.signature = encryptedSignature;
         db.updateMeta(meta, function (err) {

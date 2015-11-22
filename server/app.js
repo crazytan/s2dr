@@ -27,7 +27,7 @@ var decrypt = express.Router().post('/', function(req, res, next) {
             });
         }
         else {
-            var plainText = crypto.decryptAES(req.body.message, channel.key);
+            var plainText = crypto.decryptMessage(req.body.message, channel.key);
             req.s2dr.message = JSON.parse(plainText);
             req.s2dr.channel = channel;
             next();
@@ -43,7 +43,7 @@ var encrypt = express.Router().post('/', function(req, res) {
         message: JSON.stringify(req.s2dr.response)
     });
     /*var plainText = JSON.stringify(req.s2dr.response);
-    var cipherText = crypto.encryptAES(plainText, req.s2dr.channel.key);
+    var cipherText = crypto.encryptMessage(plainText, req.s2dr.channel.key);
     res.json({
         result: 0,
         identifier: req.s2dr.channel.myID,
