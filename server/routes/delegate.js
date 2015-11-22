@@ -4,6 +4,7 @@ var doc = require('../lib/docLib');
 var router = express.Router();
 
 router.post('/', function(req, res, next) {
+    req.s2dr.response = {};
     var response = req.s2dr.response;
     var uid = req.s2dr.message.uid;
     db.getMeta(uid, function (err, meta) {

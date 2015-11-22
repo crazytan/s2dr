@@ -11,8 +11,8 @@ var crypto = require('crypto'),
 
 const aesKeyLen = 256,  // # of bits of AES key
       aesAlgorithm = 'aes-256-ctr',
-      CAPublicPath = '../../CA.pub', // path of CA's public key
-      CAPrivatePath = '../../CA'; // path of CA's private key
+      CAPublicPath = '../CA.pub', // path of CA's public key
+      CAPrivatePath = '../CA'; // path of CA's private key
 
 // set up CA
 exports.init = function () {
@@ -23,7 +23,7 @@ exports.init = function () {
 
     // set up private key for CA
     var privateBuf = fs.readFileSync(CAPrivatePath);
-    CAPrivate.importKey(privateBuf, 'pkcs8-public');
+    CAPrivate.importKey(privateBuf, 'pkcs1-private');
 
     masterKey = this.generateAESKey();
     ifInit = true;

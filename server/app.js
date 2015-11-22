@@ -8,8 +8,11 @@ var crypto = require('./lib/cryptoLib');
 crypto.init();
 
 // middleware for decrypting incoming messages
-var decrypt = express.Router().post('/', function(req, res) {
-    db.getChannel(req.body.identifier, function (err, channel) {
+var decrypt = express.Router().post('/', function(req, res, next) {
+    req.s2dr = {};
+    req.s2dr.message = JSON.parse(req.body.message);
+    next();
+    /*db.getChannel(req.body.identifier, function (err, channel) {
         if (err) {
             res.json({
                 result: 1,
@@ -23,18 +26,23 @@ var decrypt = express.Router().post('/', function(req, res) {
             req.s2dr.channel = channel;
             next();
         }
-    });
+    });*/
 });
 
 // middleware for encrypting outgoing messages
 var encrypt = express.Router().post('/', function(req, res) {
-    var plainText = JSON.stringify(req.s2dr.response);
+    res.json({
+        result: 0,
+        identifier: '',
+        message: JSON.stringify(req.s2dr.response)
+    });
+    /*var plainText = JSON.stringify(req.s2dr.response);
     var cipherText = crypto.encryptAES(plainText, req.s2dr.channel.key);
     res.json({
         result: 0,
         identifier: req.s2dr.channel.myID,
         message: cipherText
-    });
+    });*/
 });
 
 var app = express();

@@ -4,6 +4,7 @@ var db = require('../lib/dbLib');
 var router = express.Router();
 
 router.post('/', function(req, res, next) {
+    req.s2dr.response = {};
     var response = req.s2dr.response;
     var ifNew = doc.ifNew(req.s2dr.message.uid);
     if (ifNew) {
