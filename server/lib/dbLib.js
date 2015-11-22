@@ -4,11 +4,17 @@
 var port = 8889;
 var client = require('mongodb').MongoClient;
 
+_getDocument = function (db, collectionName, property, callback) {
+    db.collection(collectionName).find(property).toArray(function (err, items) {
+        callback(err, items);
+    });
+};
+
 getDocument = function (collectionName, property, callback) {
     client.connect('mongodb://localhost:' + port + '/s2dr', function (err, db) {
         if (err) callback(err, null);
         else {
-            db.collection(collectionName).find(property).toArray(function (err, items) {
+            _getDocument(db, collectionName, property, function (err, items) {
                 db.close();
                 if (err) callback(err, null);
                 else {
@@ -20,14 +26,13 @@ getDocument = function (collectionName, property, callback) {
     });
 };
 
-updateOneMeta = function (db, meta, callback) {
+_upsertMeta = function (db, meta, callback) {
     db.collection('meta').updateOne(
         {"UID":meta.uid},
         meta,
         {upsert:true, w:1},
         function (err, result) {
-            if (err) callback(err);
-            else callback(null);
+            callback(err);
         }
     );
 };
@@ -36,12 +41,17 @@ upsertMeta = function (meta, callback) {
     client.connect('mongodb://localhost:' + port + '/s2dr', function (err, db) {
         if (err) callback(err);
         else {
-            updateOneMeta(db, meta, function (err) {
+            _upsertMeta(db, meta, function (err) {
                 db.close();
-                if (err) callback(err);
-                else callback(null);
+                callback(err);
             });
         }
+    });
+};
+
+_deleteDocument = function (db, collectionName, property, callback) {
+    db.collection(collectionName).deleteMany(property, {w:1}, function (err, result) {
+        callback(err);
     });
 };
 
@@ -49,13 +59,23 @@ deleteDocument = function (collectionName, property, callback) {
     client.connect('mongodb://localhost:' + port + '/s2dr', function (err, db) {
         if (err) callback(err);
         else {
-            db.collection(collectionName).deleteMany(property, {w:1}, function (err, result) {
+            _deleteDocument(db, collectionName, property, function (err) {
                 db.close();
-                if (err) callback(err);
-                else callback(null);
+                callback(err);
             });
         }
     });
+};
+
+_insertACE = function (db, uid, newAcl, callback) {
+    db.collecttion('meta').updateOne(
+        {"UID":uid},
+        {$set: {"acl":newAcl}},
+        {w:1},
+        function (err, result) {
+            callback(err);
+        }
+    )
 };
 
 insertACE = function (uid, newAcl, callback) {
@@ -66,10 +86,9 @@ insertACE = function (uid, newAcl, callback) {
                 {"UID":uid},
                 {$set: {"acl":newAcl}},
                 {w:1},
-                function (err, result) {
+                function (err) {
                     db.close();
-                    if (err) callback(err);
-                    else callback(null);
+                    callback(err);
                 }
             );
         }
