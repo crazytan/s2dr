@@ -26,22 +26,48 @@ getDocument = function (collectionName, property, callback) {
     });
 };
 
-_upsertMeta = function (db, meta, callback) {
-    db.collection('meta').updateOne(
-        {"UID":meta.uid},
+_insertMeta = function (db, meta, callback) {
+    db.collection('meta').insertOne(
         meta,
-        {upsert:true, w:1},
+        {w:1},
         function (err, result) {
             callback(err);
         }
     );
 };
 
-upsertMeta = function (meta, callback) {
+insertMeta = function (meta, callback) {
     client.connect('mongodb://localhost:' + port + '/s2dr', function (err, db) {
         if (err) callback(err);
         else {
-            _upsertMeta(db, meta, function (err) {
+            _insertMeta(db, meta, function (err) {
+                db.close();
+                callback(err);
+            });
+        }
+    });
+};
+
+_updateMeta = function (db, meta, callback) {
+    db.collection('meta').updateOne(
+        {UID:meta.uid},
+        {$set: {
+            flag:meta.flag,
+            signature:meta.signature,
+            key:meta.key
+        }},
+        {w:1},
+        function (err, result) {
+            callback(err);
+        }
+    );
+};
+
+updateMeta = function (meta, callback) {
+    client.connect('mongodb://localhost:' + port + '/s2dr', function (err, db) {
+        if (err) callback(err);
+        else {
+            _updateMeta(db, meta, function (err) {
                 db.close();
                 callback(err);
             });
@@ -69,8 +95,8 @@ deleteDocument = function (collectionName, property, callback) {
 
 _insertACE = function (db, uid, newAcl, callback) {
     db.collecttion('meta').updateOne(
-        {"UID":uid},
-        {$set: {"acl":newAcl}},
+        {UID:uid},
+        {$set: {acl:newAcl}},
         {w:1},
         function (err, result) {
             callback(err);
@@ -83,8 +109,8 @@ insertACE = function (uid, newAcl, callback) {
         if (err) callback(err);
         else {
             db.collection('meta').updateOne(
-                {"UID":uid},
-                {$set: {"acl":newAcl}},
+                {UID:uid},
+                {$set: {acl:newAcl}},
                 {w:1},
                 function (err) {
                     db.close();
@@ -103,8 +129,13 @@ exports.getMeta = function (uid, callback) {
     getDocument('meta', {UID: uid}, callback);
 };
 
-exports.upsertMeta = function (meta, callback) {
-    upsertMeta(meta, callback);
+exports.insertMeta = function (meta, callback) {
+    insertMeta(meta, callback);
+};
+
+exports.updateMeta = function (meta, callback) {
+    if (meta._id) delete meta._id;
+    updateMeta(meta, callback);
 };
 
 exports.deleteMeta = function (uid, callback) {

@@ -31,16 +31,16 @@ exports.init = function () {
 
 // return decrypted string in HEX
 exports.decryptAES = function (m, key) {
-    var cipher = crypto.createCipher(aesAlgorithm, key.toString('binary'));
-    var decrypted = cipher.update(m.toString('hex'), 'hex', 'hex');
-    decrypted += cipher.final('hex');
+    var cipher = crypto.createDecipher(aesAlgorithm, key.toString('binary'));
+    var decrypted = cipher.update(m.toString('hex'), 'hex', 'utf8');
+    decrypted += cipher.final('utf8');
     return decrypted;
 };
 
 // return encrypted string in HEX
 exports.encryptAES = function (m, key) {
-    var cipher = crypto.createDecipher(aesAlgorithm, key.toString('binary'));
-    var encrypted = cipher.update(m.toString('hex'), 'hex', 'hex');
+    var cipher = crypto.createCipher(aesAlgorithm, key.toString('binary'));
+    var encrypted = cipher.update(m, 'utf8', 'hex');
     encrypted += cipher.final('hex');
     return encrypted;
 };
@@ -65,5 +65,5 @@ exports.hash = function (m) {
 
 exports.generateAESKey = function () {
     const key = crypto.randomBytes(aesKeyLen / 8);
-    key.toString('hex');
+    return key.toString('hex');
 };
