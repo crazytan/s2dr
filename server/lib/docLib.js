@@ -129,7 +129,7 @@ exports.addDoc = function (channel, message, callback) {
         signature: '',
         key: '',
         acl: [{
-            name: channel.client,
+            name: channel.clientName,
             timestamp: new Date(),
             lifetime: -1,
             signature: '',

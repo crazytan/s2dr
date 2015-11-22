@@ -29,7 +29,7 @@ router.post('/', function(req, res, next) {
                 next();
             }
             else {
-                var ifPermit = doc.checkPermit(meta.acl, req.s2dr.channel.client, doc.opEnum.checkIn);
+                var ifPermit = doc.checkPermit(meta.acl, req.s2dr.channel.clientName, doc.opEnum.checkIn);
                 if (!ifPermit) {
                     response.result = 1;
                     response.message = 'unable to check in: permission denied!';

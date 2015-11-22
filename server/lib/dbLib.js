@@ -94,7 +94,7 @@ deleteDocument = function (collectionName, property, callback) {
 };
 
 _insertACE = function (db, uid, newAcl, callback) {
-    db.collecttion('meta').updateOne(
+    db.collection('meta').updateOne(
         {UID:uid},
         {$set: {acl:newAcl}},
         {w:1},
@@ -108,15 +108,10 @@ insertACE = function (uid, newAcl, callback) {
     client.connect('mongodb://localhost:' + port + '/s2dr', function (err, db) {
         if (err) callback(err);
         else {
-            db.collection('meta').updateOne(
-                {UID:uid},
-                {$set: {acl:newAcl}},
-                {w:1},
-                function (err) {
-                    db.close();
-                    callback(err);
-                }
-            );
+            _insertACE(db, uid, newAcl, function (err) {
+                db.close();
+                callback(err);
+            });
         }
     });
 };
@@ -158,4 +153,32 @@ exports.delegate = function (message, acl, ace, callback) {
     };
     acl.push(_ace);
     insertACE(message.uid, acl, callback);
+};
+
+_insertChannel = function (db, subject, publicKey, callback) {
+    db.collection('channels').insertOne(
+        {
+            clientName:subject,
+            clientPublicKey:publicKey,
+            key:'',
+            clientID:'',
+            myID:''
+        },
+        {w:1},
+        function (err, result) {
+            callback(err);
+        }
+    );
+};
+
+exports.insertChannel = function (subject, publicKey, callback) {
+    client.connect('mongodb://localhost:' + port + '/s2dr', function (err, db) {
+        if (err) callback(err);
+        else {
+            _insertChannel(db, subject, publicKey, function (err) {
+                db.close();
+                callback(err);
+            });
+        }
+    });
 };

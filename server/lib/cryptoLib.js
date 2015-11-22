@@ -94,3 +94,14 @@ exports.generateAESKey = function () {
     const key = crypto.randomBytes(aesKeyLen / 8);
     return key.toString('hex');
 };
+
+exports.checkCertificate = function (certificate) {
+    if (!CAPrivate.verify(certificate.publickey, certificate.signature, 'utf8', 'hex')) return false;
+    var date = new Date(certificate.validto);
+    var now = new Date();
+    return now < date;
+};
+
+exports.getCertificate = function () {
+    return certificate;
+};
