@@ -4,13 +4,14 @@ var db = require('../lib/dbLib');
 var router = express.Router();
 
 router.post('/', function(req, res, next) {
+    req.s2dr.response = {};
     var response = req.s2dr.response;
     var ifNew = doc.ifNew(req.s2dr.message.uid);
     if (ifNew) {
         doc.addDoc(req.s2dr.channel, req.s2dr.message, function (err) {
             if (err) {
                 response.result = 1;
-                response.message = 'unable to add new document!';
+                response.message = 'unable to add new document';
                 next();
             }
             else {
@@ -28,7 +29,7 @@ router.post('/', function(req, res, next) {
                 next();
             }
             else {
-                var ifPermit = doc.checkPermit(meta.acl, req.s2dr.channel.client, doc.opEnum.checkIn);
+                var ifPermit = doc.checkPermit(meta.acl, req.s2dr.channel.clientName, doc.opEnum.checkIn);
                 if (!ifPermit) {
                     response.result = 1;
                     response.message = 'unable to check in: permission denied!';

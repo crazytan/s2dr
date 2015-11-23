@@ -4,6 +4,7 @@ var doc = require('../lib/docLib');
 var router = express.Router();
 
 router.post('/', function(req, res, next) {
+    req.s2dr.response = {};
     var response = req.s2dr.response;
     var uid = req.s2dr.message.uid;
     db.getMeta(uid, function (err, meta) {
@@ -13,7 +14,7 @@ router.post('/', function(req, res, next) {
             next();
         }
         else {
-            var ifPermit = doc.checkPermit(meta.acl, req.s2dr.channel.client, doc.opEnum.owner);
+            var ifPermit = doc.checkPermit(meta.acl, req.s2dr.channel.clientName, doc.opEnum.owner);
             if (!ifPermit) {
                 response.result = 1;
                 response.message = 'unable to delete: permission denied!';
