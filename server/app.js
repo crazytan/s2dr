@@ -63,6 +63,10 @@ app.use('/checkin', decrypt, require('./routes/checkin'), encrypt);
 app.use('/delegate', decrypt, require('./routes/delegate'), encrypt);
 app.use('/delete', decrypt, require('./routes/delete'), encrypt);
 app.use('/terminate', decrypt, require('./routes/terminate'), encrypt);
+app.use('/test', express.Router().post('/', function (req, res) {
+    console.log(req.body.message);
+    res.end();
+}));
 
 // catch 404 and return error message
 app.use(function(req, res, next) {
