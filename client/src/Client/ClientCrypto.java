@@ -70,4 +70,33 @@ public class ClientCrypto {
         }
         return null;
     }
+
+    public static String toHexString(byte[] text) {
+        int len = text.length;
+        String rst = new String();
+        for (int i = 0; i < len; ++i) {
+            rst = rst + ClientCrypto.intToString((text[i] >> 4) & (byte)0x0f) + ClientCrypto.intToString(text[i] & (byte)0x0f);
+        }
+        return rst;
+    }
+
+    private static String intToString(int integer){
+        if (integer < 10)
+            return Integer.toString(integer);
+        switch (integer){
+            case 10:
+                return new String("A");
+            case 11:
+                return new String("B");
+            case 12:
+                return new String("C");
+            case 13:
+                return new String("D");
+            case 14:
+                return new String("E");
+            case 15:
+                return new String("F");
+        }
+        return null;
+    }
 }

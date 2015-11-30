@@ -7,12 +7,14 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.HashMap;
 import java.util.Map;
 
 import Client.ClientCrypto;
 import Client.SecureClient.UID;
 import com.sun.corba.se.spi.activation.IIOP_CLEAR_TEXT;
 import com.google.gson.Gson;
+import sun.security.rsa.RSAPublicKeyImpl;
 
 /**
  * A secure channel used by client
@@ -103,15 +105,29 @@ public class Channel {
         InsecureClient _client = new InsecureClient(discover(hostname));
 
         //Phase 1
-        String response1 = _client.send("init", "{\"phase\":1,\"message\":" + publicKey.toString() + "\"," +
+        RSAPublicKeyImpl publicKeyImpl = (RSAPublicKeyImpl) publicKey;
+        String sMessage1 = ""; // TODO: publicKey format
+        String response1 = _client.send("init", "{\"phase\":1,\"message\":" + sMessage1 + "\"," +
                 "\"signature\":\"" + "" + "\"," + "\"certificate\":\"" + "" +"\"}");
 
         Gson gson = new Gson();
-        Map<String, String> map;
+        Map<String, String> map = new HashMap<String, String>();
         Map<String, String> map1 = gson.fromJson(response1, map.getClass());
-        String message1 = map1.get("message");
-//        PublicKey serverPublicKey =
+        String rMessage1 = map1.get("message");
+        PublicKey serverPublicKey = null; // TODO: transfer rMessage1 to serverPublicKey
+
+        String sMessage2 = null;
         SecretKey clientKey = ClientCrypto.GenerateAESKey(128);
+        try {
+            Cipher rsaCipher = Cipher.getInstance("RSA");
+            rsaCipher.init(Cipher.ENCRYPT_MODE, serverPublicKey);
+            byte[] encryptedClientKey = rsaCipher.doFinal(clientKey.toString().getBytes("US-ASCII")); //TODO: check encode format
+            sMessage2 = new String(encryptedClientKey, "US-ASCII");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
         // TODO: symmetric key to channel encryption
         SecretKey key = null;
 

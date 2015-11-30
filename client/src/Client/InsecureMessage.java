@@ -2,6 +2,9 @@ package Client;
 
 import com.google.gson.Gson;
 
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,7 +54,18 @@ public class InsecureMessage {
         System.out.println(m);
         System.out.println(m.isSuccess());
         System.out.println(m.getMessage());*/
-        Map<String, String> map;
+        try {
+            KeyGenerator keygen = KeyGenerator.getInstance("AES");
+            keygen.init(128);
+            SecretKey key = keygen.generateKey();
+            Class<?> t;
+            t = key.getClass();
+            Cipher cipher = Cipher.getInstance("AES");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        Map<String, String> map = new HashMap<String, String>();
         map.put("signature", "123");
         map.put("certificate", "{\"signature\":\"456\"}");
         System.out.println(gson.toJson(map));
