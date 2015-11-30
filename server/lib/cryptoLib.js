@@ -123,3 +123,10 @@ exports.checkSignature = function (m, signature, certificate) {
     var decryptedHash = key.decryptPublic(base64Sign, 'hex');
     return hash === decryptedHash;
 };
+
+exports.encryptHex = function (m) {
+    var cipher = crypto.createCipher(aesAlgorithm, masterKey);
+    var encrypted = cipher.update(m, 'hex', 'hex');
+    encrypted += cipher.final('hex');
+    return encrypted;
+};

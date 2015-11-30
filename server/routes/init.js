@@ -55,6 +55,7 @@ router.post('/', function(req, res) {
         var certificate = req.body.certificate;
         checkCertificate(certificate, res);
         checkSignature(req.body, res);
+        // find stored channel by public key
         db.getChannelByClient(certificate.publickey, function (err, channel) {
             if (err) {
                 res.json({
@@ -67,7 +68,7 @@ router.post('/', function(req, res) {
             else {
                 var J = crypto.decryptSecureMessage(req.body.message);
                 var _J = new Buffer(crypto.generateAESKey(), 'hex');
-                if (J.length !==  _J.length) {
+                if (J.length !==  _J.length) { //TODO: verify length of decrypted key
                     res.json({
                         result:1,
                         message:'key size does not match',
@@ -76,7 +77,7 @@ router.post('/', function(req, res) {
                     });
                 }
                 var keyBuf = new Buffer(J.length);
-                for (var i = 0;i < keyBuf.length;i++) keyBuf[i] = J[i] ^ _J[i];
+                for (var i = 0;i < keyBuf.length;i++) keyBuf[i] = J[i] ^ _J[i]; // calculate J xor _J
                 channel.key = crypto.hash(keyBuf.toString('hex'));
                 db.updateChannel(channel, function (err) {
                     if (err) {
@@ -89,7 +90,7 @@ router.post('/', function(req, res) {
                     }
                     else {
                         var clientKey = new NodeRSA(channel.clientPublicKey, 'pkcs8-public');
-                        var encryptedKey = clientKey.encrypt(keyBuf,'hex');
+                        var encryptedKey = clientKey.encrypt(keyBuf, 'hex');
                         res.json({
                             result:0,
                             message:encryptedKey,
@@ -102,9 +103,41 @@ router.post('/', function(req, res) {
         });
     }
     else if (req.body.phase === 3) {
-        // TODO
         var certificate = req.body.certificate;
         checkCertificate(certificate, res);
+        checkSignature(req.body, res);
+        db.getChannelByClient(certificate.publickey, function (err, channel) {
+            if (err) {
+                res.json({
+                    result:1,
+                    message:'unable to get channel information',
+                    signature:'',
+                    certificate:{}
+                });
+            }
+            else {
+                channel.clientID = req.body.message;
+                channel.myID = crypto.encryptHex(channel.key);
+                db.updateChannel(channel, function (err) {
+                    if (err) {
+                        res.json({
+                            result:1,
+                            message:'unable to insert identifier into db',
+                            signature:'',
+                            certificate:{}
+                        });
+                    }
+                    else {
+                        res.json({
+                            result:0,
+                            message:channel.myID,
+                            signature:crypto.sign(channel.myID),
+                            certificate:JSON.stringify(crypto.getCertificate)
+                        });
+                    }
+                });
+            }
+        });
     }
     else {
         res.json({
