@@ -71,6 +71,10 @@ public class ClientCrypto {
         return null;
     }
 
+    public static byte[] toByte(String hexString){
+        return null;
+    }
+
     public static String toHexString(byte[] text) {
         int len = text.length;
         String rst = new String();

@@ -2,11 +2,9 @@ package Client;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -107,37 +105,74 @@ public class Channel {
         //Phase 1
         RSAPublicKeyImpl publicKeyImpl = (RSAPublicKeyImpl) publicKey;
         String sMessage1 = ""; // TODO: publicKey format
-        String response1 = _client.send("init", "{\"phase\":1,\"message\":" + sMessage1 + "\"," +
+        String response1 = _client.send("init", "{\"phase\":1,\"message\":" + ClientCrypto.toHexString(sMessage1.getBytes()) + "\"," +
                 "\"signature\":\"" + "" + "\"," + "\"certificate\":\"" + "" +"\"}");
 
         Gson gson = new Gson();
         Map<String, String> map = new HashMap<String, String>();
         Map<String, String> map1 = gson.fromJson(response1, map.getClass());
         String rMessage1 = map1.get("message");
-        PublicKey serverPublicKey = null; // TODO: transfer rMessage1 to serverPublicKey
+        byte[] rMessageByte1 = ClientCrypto.toByte(rMessage1);
+        PublicKey serverPublicKey = null; // TODO: transfer rMessageByte1 to serverPublicKey
 
         String sMessage2 = null;
-        SecretKey clientKey = ClientCrypto.GenerateAESKey(128);
+        SecretKey clientKey = ClientCrypto.GenerateAESKey(256);
         try {
             Cipher rsaCipher = Cipher.getInstance("RSA");
             rsaCipher.init(Cipher.ENCRYPT_MODE, serverPublicKey);
             byte[] encryptedClientKey = rsaCipher.doFinal(clientKey.toString().getBytes("US-ASCII")); //TODO: check encode format
-            sMessage2 = new String(encryptedClientKey, "US-ASCII");
+            sMessage2 = ClientCrypto.toHexString(encryptedClientKey);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
 
+        //Phase 2
+        String response2 = _client.send("init", "{\"phase\":2,\"message\":" + sMessage2 + "\"," +
+                "\"signature\":\"" + "" + "\"," + "\"certificate\":\"" + "" +"\"}");
+
+        Map<String, String> map2 = gson.fromJson(response2, map.getClass());
+        String rMessage2 = map2.get("message");
+        byte[] rMessageByte2 = ClientCrypto.toByte(rMessage2);
+        byte[] xorKeys = new byte[256];
+        byte[] clientKeyByte = clientKey.getEncoded();
+        for (int i = 0; i < 256; ++i) {
+            xorKeys[i] = (byte)(clientKeyByte[i] | rMessageByte2[i]);
+        }
+
+        byte[] sharedKey = null;
+        byte[] identifier = null;
+        String sMessage3 = null;
+        try {
+            MessageDigest hashTool = MessageDigest.getInstance("SHA-256");
+            hashTool.update(xorKeys);
+            sharedKey = hashTool.digest();
+            Cipher aesCipher = getAESCipher();
+            aesCipher.init(Cipher.ENCRYPT_MODE, masterKey);
+            identifier = aesCipher.doFinal(sharedKey);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String response3 = _client.send("init", "{\"phase\":3,\"message\":" + ClientCrypto.toHexString(identifier) + "\"," +
+                "\"signature\":\"" + "" + "\"," + "\"certificate\":\"" + "" +"\"}");
+
+        Map<String, String> map3 = gson.fromJson(response3, map.getClass());
+        String rMessage3 = map3.get("message");
+        byte[] rMessageByte3 = ClientCrypto.toByte(rMessage3);
+
         // TODO: symmetric key to channel encryption
-        SecretKey key = null;
+        SecretKey key = new SecretKeySpec(sharedKey, 0, sharedKey.length, "AES");
 
         // TODO: generate identifier
-        String identifier = null;
+        String identifierStr = identifier.toString();
+        String serverIdentifierStr = rMessageByte3.toString();
 
         // TODO: put a new Channel in the map
-        // channels.put(clientName, new Channel(key, identifier, _client));
+         channels.put(clientName, new Channel(key, identifierStr, serverIdentifierStr, _client));
 
-        //Message result = Message.newMessage();
+//        InsecureMessage result = InsecureMessage.newMessage();
         // TODO
         return null;
     }
