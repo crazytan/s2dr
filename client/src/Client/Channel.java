@@ -5,6 +5,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.security.*;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -115,7 +116,16 @@ public class Channel {
         Map<String, String> map1 = gson.fromJson(response1, map.getClass());
         String rMessage1 = map1.get("message");
         byte[] rMessageByte1 = ClientCrypto.toByte(rMessage1);
+
+        //TODO: check CA
         PublicKey serverPublicKey = null; // TODO: transfer rMessageByte1 to serverPublicKey
+
+        String rSign1 = map1.get("signature");
+        byte[] rSignByte1 = ClientCrypto.toByte(rSign1);
+        if (!Arrays.equals(ClientCrypto.doSHA256(rMessageByte1),ClientCrypto.RSADecrypt(rSignByte1, serverPublicKey))) {
+            System.out.println("phase1 signature not match!");
+            return null;
+        }
 
         //Phase 2
         String sMessage2 = null;
@@ -136,7 +146,15 @@ public class Channel {
 
         Map<String, String> map2 = gson.fromJson(response2, map.getClass());
         String rMessage2 = map2.get("message");
+        String rSign2 = map2.get("signature");
         byte[] rMessageByte2 = ClientCrypto.toByte(rMessage2);
+        byte[] rSignByte2 = ClientCrypto.toByte(rSign2);
+
+        if (!Arrays.equals(ClientCrypto.doSHA256(rMessageByte2),ClientCrypto.RSADecrypt(rSignByte2, serverPublicKey))) {
+            System.out.println("phase2 signature not match!");
+            return null;
+        }
+
         byte[] xorKeys = new byte[256];
         byte[] clientKeyByte = clientKey.getEncoded();
         for (int i = 0; i < 256; ++i) {
@@ -164,7 +182,14 @@ public class Channel {
 
         Map<String, String> map3 = gson.fromJson(response3, map.getClass());
         String rMessage3 = map3.get("message");
+        String rSign3 = map3.get("signature");
         byte[] rMessageByte3 = ClientCrypto.toByte(rMessage3);
+        byte[] rSignByte3 = ClientCrypto.toByte(rSign3);
+
+        if (!Arrays.equals(ClientCrypto.doSHA256(rMessageByte3),ClientCrypto.RSADecrypt(rSignByte3, serverPublicKey))) {
+            System.out.println("phase3 signature not match!");
+            return null;
+        }
 
         // TODO: symmetric key to channel encryption
         SecretKey key = new SecretKeySpec(sharedKey, 0, sharedKey.length, "AES");

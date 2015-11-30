@@ -72,6 +72,18 @@ public class ClientCrypto {
         return null;
     }
 
+    public static byte[] RSADecrypt(byte[] cipherText, PublicKey key) {
+        try {
+            Cipher cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.DECRYPT_MODE, key);
+            return cipher.doFinal(cipherText);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static byte[] Sign(byte[] text, PrivateKey key) {
         try {
             Cipher cipher = Cipher.getInstance("RSA");
