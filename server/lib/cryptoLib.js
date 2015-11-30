@@ -26,7 +26,7 @@ exports.init = function () {
 
     // set up private key for CA
     var privateBuf = fs.readFileSync(CAPrivatePath);
-    CAPrivate.importKey(privateBuf, 'pkcs1-private');
+    CAPrivate.importKey(privateBuf, 'pkcs8-private');
 
     // generate master key
     masterKey = this.generateAESKey();
@@ -35,7 +35,7 @@ exports.init = function () {
     var date = new Date();
     date.setFullYear(date.getFullYear() + 1);
 
-    var myPublicStr = myPrivate.exportKey('pkcs1-public');
+    var myPublicStr = myPrivate.exportKey('pkcs8-public');
     // generate certificate
     certificate = {
         subject: 's2dr-server',
