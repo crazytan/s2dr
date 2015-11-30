@@ -96,10 +96,7 @@ exports.generateAESKey = function () {
 };
 
 exports.checkCertificate = function (certificate) {
-    var hash = this.hash(certificate.publickey);
-    var base64Sign = new Buffer(certificate.signature, 'hex').toString('base64');
-    var decryptedHash = CAPublic.decryptPublic(base64Sign, 'hex');
-    if (hash !== decryptedHash) return false;
+    if (!this.checkSignature(certificate.publickey, certificate.signature, certificate)) return false;
     var date = new Date(certificate.validto);
     var now = new Date();
     return now < date;
@@ -107,4 +104,22 @@ exports.checkCertificate = function (certificate) {
 
 exports.getCertificate = function () {
     return certificate;
+};
+
+exports.decryptSecureMessage = function (m) {
+    var base64M = new Buffer(m, 'hex').toString('base64');
+    return myPrivate.decrypt(base64M);
+};
+
+exports.sign = function (m) {
+    var hash = this.hash(m);
+    return myPrivate.encryptPrivate(m, 'hex', 'hex');
+};
+
+exports.checkSignature = function (m, signature, certificate) {
+    var hash = this.hash(m);
+    var key = new NodeRSA(certificate.publickey, 'pkcs8-public');
+    var base64Sign = new Buffer(signature, 'hex').toString('base64');
+    var decryptedHash = key.decryptPublic(base64Sign, 'hex');
+    return hash === decryptedHash;
 };
