@@ -3,6 +3,7 @@ package Client;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
@@ -27,6 +28,18 @@ public class ClientCrypto {
         try {
             Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.ENCRYPT_MODE, key);
+            return cipher.doFinal(text);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static byte[] AESDecrypt(byte[] text, SecretKey key) {
+        try {
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.DECRYPT_MODE, key);
             return cipher.doFinal(text);
         }
         catch (Exception e) {
@@ -64,6 +77,18 @@ public class ClientCrypto {
             Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.ENCRYPT_MODE, key);
             return cipher.doFinal(text);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static byte[] doSHA256(byte[] text) {
+        try {
+            MessageDigest hashTool = MessageDigest.getInstance("SHA-256");
+            hashTool.update(text);
+            return hashTool.digest();
         }
         catch (Exception e) {
             e.printStackTrace();

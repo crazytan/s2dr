@@ -105,8 +105,10 @@ public class Channel {
         //Phase 1
         RSAPublicKeyImpl publicKeyImpl = (RSAPublicKeyImpl) publicKey;
         String sMessage1 = ""; // TODO: publicKey format
+        byte[] sMessageByte1 = ClientCrypto.doSHA256(sMessage1.getBytes());
+        String signature1 = ClientCrypto.toHexString(ClientCrypto.Sign(sMessageByte1, privateKey));
         String response1 = _client.send("init", "{\"phase\":1,\"message\":" + ClientCrypto.toHexString(sMessage1.getBytes()) + "\"," +
-                "\"signature\":\"" + "" + "\"," + "\"certificate\":\"" + "" +"\"}");
+                "\"signature\":\"" + signature1 + "\"," + "\"certificate\":\"" + "" +"\"}");
 
         Gson gson = new Gson();
         Map<String, String> map = new HashMap<String, String>();
@@ -115,21 +117,22 @@ public class Channel {
         byte[] rMessageByte1 = ClientCrypto.toByte(rMessage1);
         PublicKey serverPublicKey = null; // TODO: transfer rMessageByte1 to serverPublicKey
 
+        //Phase 2
         String sMessage2 = null;
+        String signature2 = null;
         SecretKey clientKey = ClientCrypto.GenerateAESKey(256);
         try {
-            Cipher rsaCipher = Cipher.getInstance("RSA");
-            rsaCipher.init(Cipher.ENCRYPT_MODE, serverPublicKey);
-            byte[] encryptedClientKey = rsaCipher.doFinal(clientKey.toString().getBytes("US-ASCII")); //TODO: check encode format
-            sMessage2 = ClientCrypto.toHexString(encryptedClientKey);
+            byte[] clientKeyByte = clientKey.toString().getBytes("US-ASCII");
+            sMessage2 = ClientCrypto.toHexString(ClientCrypto.RSAEncrypt(clientKeyByte, serverPublicKey)); //TODO: check encode format
+            byte[] sMessageByte2 = ClientCrypto.doSHA256(sMessage2.getBytes());
+            signature2 = ClientCrypto.toHexString(ClientCrypto.Sign(sMessageByte2, privateKey));
         }
         catch (Exception e) {
             e.printStackTrace();
         }
 
-        //Phase 2
         String response2 = _client.send("init", "{\"phase\":2,\"message\":" + sMessage2 + "\"," +
-                "\"signature\":\"" + "" + "\"," + "\"certificate\":\"" + "" +"\"}");
+                "\"signature\":\"" + signature2 + "\"," + "\"certificate\":\"" + "" +"\"}");
 
         Map<String, String> map2 = gson.fromJson(response2, map.getClass());
         String rMessage2 = map2.get("message");
@@ -140,23 +143,24 @@ public class Channel {
             xorKeys[i] = (byte)(clientKeyByte[i] | rMessageByte2[i]);
         }
 
+        //Phase 3
         byte[] sharedKey = null;
         byte[] identifier = null;
         String sMessage3 = null;
+        String signature3 = null;
         try {
-            MessageDigest hashTool = MessageDigest.getInstance("SHA-256");
-            hashTool.update(xorKeys);
-            sharedKey = hashTool.digest();
-            Cipher aesCipher = getAESCipher();
-            aesCipher.init(Cipher.ENCRYPT_MODE, masterKey);
-            identifier = aesCipher.doFinal(sharedKey);
+            sharedKey = ClientCrypto.doSHA256(xorKeys);
+            identifier = ClientCrypto.AESEncrypt(sharedKey, masterKey);
+            sMessage3 = ClientCrypto.toHexString(identifier);
+            byte[] sMessageByte3 = ClientCrypto.doSHA256(sMessage3.getBytes());
+            signature3 = ClientCrypto.toHexString(ClientCrypto.Sign(sMessageByte3, privateKey));
         }
         catch (Exception e) {
             e.printStackTrace();
         }
 
-        String response3 = _client.send("init", "{\"phase\":3,\"message\":" + ClientCrypto.toHexString(identifier) + "\"," +
-                "\"signature\":\"" + "" + "\"," + "\"certificate\":\"" + "" +"\"}");
+        String response3 = _client.send("init", "{\"phase\":3,\"message\":" + sMessage3 + "\"," +
+                "\"signature\":\"" + signature3 + "\"," + "\"certificate\":\"" + "" +"\"}");
 
         Map<String, String> map3 = gson.fromJson(response3, map.getClass());
         String rMessage3 = map3.get("message");
