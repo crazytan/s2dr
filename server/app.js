@@ -1,28 +1,76 @@
+/*
+ *  node.js server for secure shared document repository
+ */
 var express = require('express');
-var path = require('path');
+var bodyParser = require('body-parser');
+var db = require('./lib/dbLib');
+var crypto = require('./lib/cryptoLib');
+crypto.init();
 
-var decrypt = require('./routes/decrypt');
-var init_session = require('./routes/init');
-var check_out = require('./routes/checkout');
-var check_in = require('./routes/checkin');
-var delegate = require('./routes/delegate');
-var safe_delete = require('./routes/delete');
-var terminate_session = require('./routes/terminate');
+// middleware for decrypting incoming messages
+var decrypt = express.Router().post('/', function(req, res, next) {
+    /*req.s2dr = {};
+    req.s2dr.message = JSON.parse(req.body.message);
+    req.s2dr.channel = {
+        clientID: 'soifwje',
+        myId: 'asoidjw',
+        key: 'joi2n123joi',
+        client: 'tan'
+    };
+    next();*/
+    db.getChannel(req.body.identifier, function (err, channel) {
+        if (err) {
+            res.json({
+                result: 1,
+                identifier: null,
+                message: 'invalid identifier!'
+            });
+        }
+        else {
+            var plainText = crypto.decryptMessage(req.body.message, channel.key);
+            req.s2dr.message = JSON.parse(plainText);
+            req.s2dr.channel = channel;
+            next();
+        }
+    });
+});
+
+// middleware for encrypting outgoing messages
+var encrypt = express.Router().post('/', function(req, res) {
+    /*res.json({
+        result: 0,
+        identifier: '',
+        message: JSON.stringify(req.s2dr.response)
+    });*/
+    var plainText = JSON.stringify(req.s2dr.response);
+    var cipherText = crypto.encryptMessage(plainText, req.s2dr.channel.key);
+    res.json({
+        result: 0,
+        identifier: req.s2dr.channel.myID,
+        message: cipherText
+    });
+});
 
 var app = express();
 
-app.use('/init', init_session);
-app.use('/checkout', decrypt, check_out);
-app.use('/checkin', decrypt, check_in);
-app.use('/delegate', decrypt, delegate);
-app.use('/delete', decrypt, safe_delete);
-app.use('/terminate', decrypt, terminate_session);
+// set up body parser
+app.use(bodyParser.json());
 
-// catch 404 and forward to error handler
+// set up routers for client calls
+app.use('/init', require('./routes/init'));
+app.use('/checkout', decrypt, require('./routes/checkout'), encrypt);
+app.use('/checkin', decrypt, require('./routes/checkin'), encrypt);
+app.use('/delegate', decrypt, require('./routes/delegate'), encrypt);
+app.use('/delete', decrypt, require('./routes/delete'), encrypt);
+app.use('/terminate', decrypt, require('./routes/terminate'), encrypt);
+
+// catch 404 and return error message
 app.use(function(req, res, next) {
-    var err = new Error('Not Found');
-    err.status = 404;
-    next(err);
+    res.json({
+        result: 1,
+        identifier: null,
+        message: 'url or method error!'
+    });
 });
 
 var server = app.listen(8888, function() {

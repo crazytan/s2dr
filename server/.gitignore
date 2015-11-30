@@ -1,2 +1,11 @@
 # WebStorm folder
 .idea/
+
+# database folder
+data/
+
+# document folder
+docs/
+
+# nodejs modules
+node_modules/

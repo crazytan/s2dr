@@ -7,7 +7,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 
 /**
- * Created by Kard on 11/18/15.
+ * A helper class for cryptographic operations
  */
 public class ClientCrypto {
 
