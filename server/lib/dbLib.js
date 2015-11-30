@@ -18,7 +18,7 @@ getDocument = function (collectionName, property, callback) {
                 db.close();
                 if (err) callback(err, null);
                 else {
-                    if (items.length != 1) callback(new Error(), null);
+                    if (items.length !== 1) callback(new Error(), null);
                     else callback(null, items[0]);
                 }
             });
@@ -182,3 +182,34 @@ exports.insertChannel = function (subject, publicKey, callback) {
         }
     });
 };
+
+exports.getChannelByClient = function (publicKey, callback) {
+    getDocument('channels', {clientPublicKey: publicKey}, callback);
+}
+
+_updateChannel = function (db, channel, callback) {
+    db.collection('channels').updateOne(
+        {clientName:channel.clientName},
+        {$set: {
+            clientID:channel.clientID,
+            myID:channel.myID,
+            key:channel.key
+        }},
+        {w:1},
+        function (err, result) {
+            callback(err);
+        }
+    );
+};
+
+exports.updateChannel = function (channel, callback) {
+    client.connect('mongodb://localhost:' + port + '/s2dr', function (err, db) {
+        if (err) callback(err);
+        else {
+            _updateChannel(db, channel, function (err) {
+                db.close();
+                callback(err);
+            })
+        }
+    });
+}
