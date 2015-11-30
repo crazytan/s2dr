@@ -25,7 +25,7 @@ router.post('/', function(req, res) {
                     result:1,
                     message:'unable to insert into db',
                     signature:'',
-                    certitifcate:{}
+                    certificate:{}
                 });
             }
             else {
@@ -34,7 +34,7 @@ router.post('/', function(req, res) {
                     message:'',
                     signature:'',
                     certificate:JSON.stringify(crypto.getCertificate())
-                })
+                });
             }
         });
     }
