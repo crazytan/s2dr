@@ -96,7 +96,10 @@ exports.generateAESKey = function () {
 };
 
 exports.checkCertificate = function (certificate) {
-    if (!CAPrivate.verify(certificate.publickey, certificate.signature, 'utf8', 'hex')) return false;
+    var hash = this.hash(certificate.publickey);
+    var base64Sign = new Buffer(certificate.signature, 'hex').toString('base64');
+    var decryptedHash = CAPublic.decryptPublic(base64Sign, 'hex');
+    if (hash !== decryptedHash) return false;
     var date = new Date(certificate.validto);
     var now = new Date();
     return now < date;
