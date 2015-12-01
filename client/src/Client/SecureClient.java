@@ -37,6 +37,7 @@ public class SecureClient {
             gen.init(128);
             masterKey = gen.generateKey();
 
+            // TODO
             KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
             KeyPair keyPair = keyPairGen.generateKeyPair();
             publicKey = keyPair.getPublic();
