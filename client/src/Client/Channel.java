@@ -3,6 +3,7 @@ package Client;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.UnsupportedEncodingException;
@@ -113,12 +114,7 @@ public class Channel {
         }
         try {
             String publicKeyStr = CA.extractPublicKeyFromCertificate(certificate);
-            publicKeyStr.replace("-----BEGIN PUBLIC KEY-----\n", "");
-            publicKeyStr.replace("-----END PUBLIC KEY-----", "");
-            publicKeyStr.replace("\n", "");
-            byte[] publicKeyByte = Base64.getDecoder().decode(publicKeyStr.getBytes());
-            PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(publicKeyByte));
-            return publicKey;
+            return ClientCrypto.stringToPublicKey(publicKeyStr);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -133,23 +129,19 @@ public class Channel {
         String certificate = "";
         try{
             Path path = FileSystems.getDefault().getPath(System.getenv("workspace" + clientName.id + "/certificate"));
-            List<String> crtList = Files.readAllLines(path);
-            crtList.remove(0);
-            crtList.remove(crtList.size() - 1);
-            for (String str : crtList) {
-                certificate = certificate + str;
-            }
+            byte[] crtByte = Files.readAllBytes(path);
+            certificate = new String(crtByte);
         }
         catch (Exception e) {
             System.out.println("Certificate not found!");
         }
 
         //Phase 1
-        String sMessage1 = ClientCrypto.keyToString(publicKey);
+        String sMessage1 = ClientCrypto.publicKeyToString(publicKey);
         byte[] sMessageByte1 = ClientCrypto.doSHA256(sMessage1.getBytes());
         String signature1 = ClientCrypto.toHexString(ClientCrypto.Sign(sMessageByte1, privateKey));
         String response1 = _client.send("init", "{\"phase\":1,\"message\":" + ClientCrypto.toHexString(sMessage1.getBytes()) + "\"," +
-                "\"signature\":\"" + signature1 + "\"," + "\"certificate\":\"" + ClientCrypto.toHexString(certificate.getBytes()) +"\"}");
+                "\"signature\":\"" + signature1 + "\"," + "\"certificate\":\"" + certificate +"\"}");
 
         Gson gson = new Gson();
 
@@ -186,7 +178,7 @@ public class Channel {
         }
 
         String response2 = _client.send("init", "{\"phase\":2,\"message\":" + sMessage2 + "\"," +
-                "\"signature\":\"" + signature2 + "\"," + "\"certificate\":\"" + ClientCrypto.toHexString(certificate.getBytes()) +"\"}");
+                "\"signature\":\"" + signature2 + "\"," + "\"certificate\":\"" + certificate +"\"}");
 
         Map<String, String> map2 = gson.fromJson(response2, map.getClass());
         String rMessage2 = map2.get("message");
@@ -227,7 +219,7 @@ public class Channel {
         }
 
         String response3 = _client.send("init", "{\"phase\":3,\"message\":" + sMessage3 + "\"," +
-                "\"signature\":\"" + signature3 + "\"," + "\"certificate\":\"" + ClientCrypto.toHexString(certificate.getBytes()) +"\"}");
+                "\"signature\":\"" + signature3 + "\"," + "\"certificate\":\"" + certificate +"\"}");
 
         Map<String, String> map3 = gson.fromJson(response3, map.getClass());
         String rMessage3 = map3.get("message");

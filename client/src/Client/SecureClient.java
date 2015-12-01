@@ -61,7 +61,26 @@ public class SecureClient {
         try {
             Path path = FileSystems.getDefault().getPath(System.getenv("workspace") + name);
             if (Files.exists(path)) {
+                try {
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + name + "/key.master");
+                    byte[] masterkeyByte = Files.readAllBytes(path);
+                    masterKey = ClientCrypto.stringToAESKey(new String(masterkeyByte));
 
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + name + "/key.public");
+                    byte[] publickeyByte = Files.readAllBytes(path);
+                    publicKey = ClientCrypto.stringToPublicKey(new String(publickeyByte));
+
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + name + "/key.private");
+                    byte[] privatekeyByte = Files.readAllBytes(path);
+                    privateKey = ClientCrypto.stringToPrivateKey(new String(privatekeyByte));
+
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + name + "/certificate");
+                    byte[] certificateByte = Files.readAllBytes(path);
+                    certificate = new String(certificateByte);
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
             }else {
                 File dir = new File(System.getenv("workspace") + name);
                 dir.mkdir();KeyGenerator gen = KeyGenerator.getInstance("AES");
@@ -73,7 +92,22 @@ public class SecureClient {
                 publicKey = keyPair.getPublic();
                 privateKey = keyPair.getPrivate();
 
-                certificate = CA.createCertificate(name, ClientCrypto.keyToString(privateKey));
+                certificate = CA.createCertificate(name, ClientCrypto.privateKeyToString(privateKey));
+
+                //save to disk
+                try {
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + name + "/key.master");
+                    Files.write(path, ClientCrypto.aesKeyToString(masterKey).getBytes());
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + name + "/key.public");
+                    Files.write(path, ClientCrypto.publicKeyToString(publicKey).getBytes());
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + name + "/key.private");
+                    Files.write(path, ClientCrypto.privateKeyToString(privateKey).getBytes());
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + name + "/certificate");
+                    Files.write(path, certificate.getBytes());
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
         catch (NoSuchAlgorithmException e) {
