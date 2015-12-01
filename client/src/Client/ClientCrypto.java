@@ -10,6 +10,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 
 /**
  * A helper class for cryptographic operations
@@ -112,24 +113,41 @@ public class ClientCrypto {
         return null;
     }
 
-    //TODO
-    public static String keyToString(PublicKey key) {
-        String keyStr = new String("-----BEGIN PUBLIC KEY-----\n");
-        keyStr = keyStr + new String(key.getEncoded()) + "-----END PUBLIC KEY-----\n";
-        return keyStr;
+    private static String devideToLines(String string) {
+        String multiLinesStr = "";
+        while (string.length() > 63) {
+            multiLinesStr = multiLinesStr + string.substring(0, 63) + "\n";
+            string = string.substring(63, string.length() - 1);
+        }
+        multiLinesStr = multiLinesStr + string + "\n";
+        return multiLinesStr;
     }
 
-    //TODO
-    public static String keyToString(PrivateKey key) {
-        String keyStr = new String("-----BEGIN PRIVATE KEY-----\n");
-        keyStr = keyStr + new String(key.getEncoded()) + "-----END PRIVATE KEY-----\n";
-        return keyStr;
+    public static String publicKeyToString(PublicKey key) {
+        byte[] keyByte = Base64.getEncoder().encode(key.getEncoded());
+        String keyStr = new String(keyByte);
+        return "-----BEGIN PUBLIC KEY-----\n" + devideToLines(keyStr) + "-----END PUBLIC KEY-----";
     }
 
-    //TODO
+    public static String privateKeyToString(PrivateKey key) {
+        byte[] keyByte = Base64.getEncoder().encode(key.getEncoded());
+        String keyStr = new String(keyByte);
+        return "-----BEGIN PRIVATE KEY-----\n" + devideToLines(keyStr) + "-----END PRIVATE KEY-----";
+    }
+
+    public static String aesKeyToString(SecretKey key) {
+        byte[] keyByte = Base64.getEncoder().encode(key.getEncoded());
+        String keyStr = new String(keyByte);
+        return "-----BEGIN AES KEY-----\n" + devideToLines(keyStr) + "-----END AES KEY-----";
+    }
+
     public static PublicKey stringToPublicKey(String string) {
         try {
-            return KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(string.getBytes()));
+            string.replace("-----BEGIN PUBLIC KEY-----\n", "");
+            string.replace("-----END PUBLIC KEY-----", "");
+            string.replace("\n", "");
+            byte[] keyByte = Base64.getDecoder().decode(string.getBytes());
+            return KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(keyByte));
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -137,10 +155,13 @@ public class ClientCrypto {
         return null;
     }
 
-    //TODO
     public static PrivateKey stringToPrivateKey(String string) {
         try {
-            return KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(string.getBytes()));
+            string.replace("-----BEGIN PRIVATE KEY-----\n", "");
+            string.replace("-----END PRIVATE KEY-----", "");
+            string.replace("\n", "");
+            byte[] keyByte = Base64.getDecoder().decode(string.getBytes());
+            return KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(keyByte));
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -148,10 +169,13 @@ public class ClientCrypto {
         return null;
     }
 
-    //TODO
     public static SecretKey stringToAESKey(String string) {
         try {
-            return new SecretKeySpec(string.getBytes(), 0, string.getBytes().length, "AES");
+            string.replace("-----BEGIN AES KEY-----\n", "");
+            string.replace("-----END AES KEY-----", "");
+            string.replace("\n", "");
+            byte[] keyByte = Base64.getDecoder().decode(string.getBytes());
+            return new SecretKeySpec(keyByte, 0, keyByte.length, "AES");
         }
         catch (Exception e) {
             e.printStackTrace();
