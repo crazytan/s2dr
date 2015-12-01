@@ -15,7 +15,7 @@ const aesKeyLen = 256,  // # of bits of AES key
       aesAlgorithm = 'aes-256-ctr',
       hashAlgorithm = 'sha256',
       CAPublicPath = '../CA.pub', // path of CA's public key
-      CAPrivatePath = '../CA'; // path of CA's private key
+      CAPrivatePath = '../CA.key'; // path of CA's private key
 
 // set up CA
 exports.init = function () {
