@@ -118,9 +118,15 @@ exports.sign = function (m) {
     return myPrivate.encryptPrivate(hash, 'hex', 'hex');
 };
 
+exports.extractPublicKey = function (certificate) {
+    openssl.exec('x509', new Buffer(certificate), {pubkey: null, noout: null}, function (err, buffer) {
+        return buffer.toString();
+    });
+};
+
 exports.checkSignature = function (m, signature, certificate) {
     var hash = this.hash(m);
-    var key = new NodeRSA(certificate.publickey, 'pkcs8-public');
+    var key = new NodeRSA(this.extractPublicKey(certificate), 'pkcs8-public');
     var base64Sign = new Buffer(signature, 'hex').toString('base64');
     var decryptedHash = key.decryptPublic(base64Sign, 'hex');
     return hash === decryptedHash;
