@@ -35,7 +35,7 @@ public class CA {
             writer.write(privateKey);
             writer.close();
 
-            Process ps = ProcessUtil.createOpenSSLProcess(new String[] {"req", "-new", "-key", tmpKey.getName(), "-subj", name});
+            Process ps = ProcessUtil.createOpenSSLProcess(new String[] {"req", "-new", "-key", tmpKey.getName(), "-subj", "/CN=" + name});
             String csr = ProcessUtil.getStandardOutput(ps);
             ps = ProcessUtil.createOpenSSLProcess(new String[] {"x509", "-req", "-days", "365", "-CA", "CA.crt", "-CAkey", "CA.key", "-CAserial", "CA.srl"});
             ProcessUtil.writeStandardInput(csr, ps);
