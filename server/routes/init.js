@@ -32,7 +32,7 @@ router.post('/', function(req, res) {
     if (req.body.phase === 1) {
         var certificate = req.body.certificate;
         checkCertificate(certificate, res);
-        db.insertChannel(certificate.subject, certificate.publickey, function (err) {
+        db.insertChannel(crypto.extractSubject(certificate), crypto.extractPublicKey(certificate), function (err) {
             if (err) {
                 res.json({
                     result:1,
@@ -46,7 +46,7 @@ router.post('/', function(req, res) {
                     result:0,
                     message:'',
                     signature:'',
-                    certificate:JSON.stringify(crypto.getCertificate())
+                    certificate:crypto.getCertificate()
                 });
             }
         });
@@ -56,7 +56,7 @@ router.post('/', function(req, res) {
         checkCertificate(certificate, res);
         checkSignature(req.body, res);
         // find stored channel by public key
-        db.getChannelByClient(certificate.publickey, function (err, channel) {
+        db.getChannelByClient(crypto.extractPublicKey(certificate), function (err, channel) {
             if (err) {
                 res.json({
                     result:1,
@@ -95,7 +95,7 @@ router.post('/', function(req, res) {
                             result:0,
                             message:encryptedKey,
                             signature:crypto.sign(encryptedKey),
-                            certificate:JSON.stringify(crypto.getCertificate)
+                            certificate:crypto.getCertificate
                         });
                     }
                 });
@@ -106,7 +106,7 @@ router.post('/', function(req, res) {
         var certificate = req.body.certificate;
         checkCertificate(certificate, res);
         checkSignature(req.body, res);
-        db.getChannelByClient(certificate.publickey, function (err, channel) {
+        db.getChannelByClient(crypto.extractPublicKey(certificate), function (err, channel) {
             if (err) {
                 res.json({
                     result:1,
@@ -132,7 +132,7 @@ router.post('/', function(req, res) {
                             result:0,
                             message:channel.myID,
                             signature:crypto.sign(channel.myID),
-                            certificate:JSON.stringify(crypto.getCertificate)
+                            certificate:crypto.getCertificate
                         });
                     }
                 });

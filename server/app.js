@@ -1,11 +1,12 @@
 /*
  *  node.js server for secure shared document repository
  */
-var express = require('express');
-var bodyParser = require('body-parser');
-var db = require('./lib/dbLib');
-var crypto = require('./lib/cryptoLib');
-const debug = false;
+var express = require('express'),
+    bodyParser = require('body-parser'),
+    db = require('./lib/dbLib'),
+    crypto = require('./lib/cryptoLib'),
+    debug = false;
+
 crypto.init();
 
 // middleware for decrypting incoming messages

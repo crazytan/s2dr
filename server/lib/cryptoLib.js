@@ -124,6 +124,13 @@ exports.extractPublicKey = function (certificate) {
     });
 };
 
+exports.extractSubject = function (certificate) {
+    openssl.exec('x509', new Buffer(certificate), {subject:null, noout: null}, function (err, buffer) {
+        var subject = buffer.toString();
+        return subject.substring(subject.lastIndexOf('=') + 1);
+    });
+};
+
 exports.checkSignature = function (m, signature, certificate) {
     var hash = this.hash(m);
     var key = new NodeRSA(this.extractPublicKey(certificate), 'pkcs8-public');
