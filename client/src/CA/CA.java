@@ -10,7 +10,14 @@ public class CA {
     private static final File root = new File(System.getenv("root"));
 
     public static String extractPublicKeyFromCertificate(String certificate) {
-
+        try {
+            Process ps = ProcessUtil.createOpenSSLProcess(new String[]{"x509", "-pubkey", "-noout"});
+            ProcessUtil.writeStandardInput(certificate, ps);
+            return ProcessUtil.getStandardOutput(ps);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -51,6 +58,5 @@ public class CA {
     }
 
     public static void main(String[] args) throws IOException {
-
     }
 }
