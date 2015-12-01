@@ -3,3 +3,5 @@ CA.key
 
 # CA's serial file
 CA.srl
+
+.DS_Store
