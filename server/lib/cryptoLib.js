@@ -15,7 +15,8 @@ const aesKeyLen = 256,  // # of bits of AES key
       aesAlgorithm = 'aes-256-ctr',
       hashAlgorithm = 'sha256',
       CAPublicPath = '../CA.pub', // path of CA's public key
-      CAPrivatePath = '../CA.key'; // path of CA's private key
+      CAPrivatePath = '../CA.key', // path of CA's private key
+      CACertPath = '../CA.crt'; // path of CA's certificate
 
 // set up CA
 exports.init = function () {
@@ -36,6 +37,7 @@ exports.init = function () {
     date.setFullYear(date.getFullYear() + 1);
 
     var myPublicStr = myPrivate.exportKey('pkcs8-public');
+
     // generate certificate
     certificate = {
         subject: 's2dr-server',

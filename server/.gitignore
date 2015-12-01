@@ -9,3 +9,6 @@ docs/
 
 # nodejs modules
 node_modules/
+
+# private key
+*.key
