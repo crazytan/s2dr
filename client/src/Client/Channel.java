@@ -147,10 +147,10 @@ public class Channel {
             System.out.println("Certificate invalid in phase 1!");
             return null;
         }
-        byte[] serverPublicKeyByte1 = CA.extractPublicKeyFromCertificate(rCrt1);
+        String serverPublicKeyByte1 = CA.extractPublicKeyFromCertificate(rCrt1);
         PublicKey serverPublicKey = null;
         try {
-            serverPublicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(serverPublicKeyByte1));
+            serverPublicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(serverPublicKeyByte1.getBytes()));
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -190,10 +190,10 @@ public class Channel {
             System.out.println("Certificate invalid in phase 2!");
             return null;
         }
-        byte[] serverPublicKeyByte2 = CA.extractPublicKeyFromCertificate(rCrt2);
+        String serverPublicKeyByte2 = CA.extractPublicKeyFromCertificate(rCrt2);
 
         try {
-            serverPublicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(serverPublicKeyByte2));
+            serverPublicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(serverPublicKeyByte2.getBytes()));
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -240,10 +240,10 @@ public class Channel {
             System.out.println("Certificate invalid in phase 3!");
             return null;
         }
-        byte[] serverPublicKeyByte3 = CA.extractPublicKeyFromCertificate(rCrt3);
+        String serverPublicKeyByte3 = CA.extractPublicKeyFromCertificate(rCrt3);
 
         try {
-            serverPublicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(serverPublicKeyByte3));
+            serverPublicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(serverPublicKeyByte3.getBytes()));
         }
         catch (Exception e) {
             e.printStackTrace();

@@ -131,7 +131,7 @@ public class SecureClient {
         System.out.println("Operations: init, checkout, checkin, delegate, delete, terminate");
     }
 
-    private UID generateUID(String uid) {
+    public UID generateUID(String uid) {
         return new UID(uid);
     }
 
