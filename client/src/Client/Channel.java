@@ -107,7 +107,7 @@ public class Channel {
                 "\"signature\":\"" + "" + "\"," + "\"certificate\":\"" + "" +"\"}");
 
         Gson gson = new Gson();
-        Map<String, String> map;
+        Map<String, String> map = null;
         Map<String, String> map1 = gson.fromJson(response1, map.getClass());
         String message1 = map1.get("message");
 //        PublicKey serverPublicKey =

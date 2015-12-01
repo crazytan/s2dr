@@ -51,7 +51,7 @@ public class InsecureMessage {
         System.out.println(m);
         System.out.println(m.isSuccess());
         System.out.println(m.getMessage());*/
-        Map<String, String> map;
+        Map<String, String> map = new HashMap<>();
         map.put("signature", "123");
         map.put("certificate", "{\"signature\":\"456\"}");
         System.out.println(gson.toJson(map));
