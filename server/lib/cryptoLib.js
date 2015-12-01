@@ -4,47 +4,47 @@
 var crypto = require('crypto'),
     NodeRSA = require('node-rsa'),
     fs = require('fs'),
+    openssl = require('openssl-wrapper'),
     ifInit = false, // if CA is set up
     CAPublic = new NodeRSA(), // CA's public key
     CAPrivate = new NodeRSA(), // CA's private key
-    myPrivate = new NodeRSA({b: 2048}), // server's private key
+    myPrivate = new NodeRSA(), // server's private key
     masterKey = '', // master key
-    certificate = {}; // server's certificate
+    myCert = '', // server's certificate
+    CACert = ''; // CA's certificate
 
-const aesKeyLen = 256,  // # of bits of AES key
-      aesAlgorithm = 'aes-256-ctr',
-      hashAlgorithm = 'sha256',
-      CAPublicPath = '../CA.pub', // path of CA's public key
-      CAPrivatePath = '../CA.key', // path of CA's private key
-      CACertPath = '../CA.crt'; // path of CA's certificate
+var aesKeyLen = 256,  // # of bits of AES key
+    aesAlgorithm = 'aes-256-ctr',
+    hashAlgorithm = 'sha256',
+    CAPublicPath = '../CA.pub', // path of CA's public key
+    CAPrivatePath = '../CA.key', // path of CA's private key
+    CACertPath = '../CA.crt', // path of CA's certificate
+    myPrivatePath = 'server.key', // path of server's private key
+    myCertPath = 'server.crt'; // path of server's certificate
 
 // set up CA
 exports.init = function () {
     if (ifInit) return;
     // set up public key for CA
-    var publicBuf = fs.readFileSync(CAPublicPath);
-    CAPublic.importKey(publicBuf, 'pkcs8-public');
+    var buf = fs.readFileSync(CAPublicPath);
+    CAPublic.importKey(buf, 'pkcs8-public');
 
     // set up private key for CA
-    var privateBuf = fs.readFileSync(CAPrivatePath);
-    CAPrivate.importKey(privateBuf, 'pkcs8-private');
+    buf = fs.readFileSync(CAPrivatePath);
+    CAPrivate.importKey(buf, 'pkcs8-private');
+
+    buf = fs.readFileSync(myPrivatePath);
+    myPrivate.importKey(buf, 'pkcs8-private');
+
+    buf = fs.readFileSync(myCertPath);
+    myCert = buf.toString();
+
+    buf = fs.readFileSync(CACertPath);
+    CACert = buf.toString();
 
     // generate master key
     masterKey = this.generateAESKey();
 
-    // make the certificate valid for one year
-    var date = new Date();
-    date.setFullYear(date.getFullYear() + 1);
-
-    var myPublicStr = myPrivate.exportKey('pkcs8-public');
-
-    // generate certificate
-    certificate = {
-        subject: 's2dr-server',
-        validto: date.toDateString(),
-        publickey: myPublicStr,
-        signature: CAPrivate.sign(myPublicStr, 'hex', 'utf8')
-    };
     ifInit = true;
 };
 
@@ -93,19 +93,19 @@ exports.hash = function (m) {
 };
 
 exports.generateAESKey = function () {
-    const key = crypto.randomBytes(aesKeyLen / 8);
+    var key = crypto.randomBytes(aesKeyLen / 8);
     return key.toString('hex');
 };
 
 exports.checkCertificate = function (certificate) {
-    if (!this.checkSignature(certificate.publickey, certificate.signature, certificate)) return false;
-    var date = new Date(certificate.validto);
-    var now = new Date();
-    return now < date;
+    openssl.exec('verify', new Buffer(certificate), {trusted: CACertPath}, function (err, buffer) {
+        if (err) return false;
+        return true;
+    });
 };
 
 exports.getCertificate = function () {
-    return certificate;
+    return myCert;
 };
 
 exports.decryptSecureMessage = function (m) {
@@ -115,7 +115,7 @@ exports.decryptSecureMessage = function (m) {
 
 exports.sign = function (m) {
     var hash = this.hash(m);
-    return myPrivate.encryptPrivate(m, 'hex', 'hex');
+    return myPrivate.encryptPrivate(hash, 'hex', 'hex');
 };
 
 exports.checkSignature = function (m, signature, certificate) {
