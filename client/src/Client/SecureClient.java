@@ -1,15 +1,17 @@
 package Client;
 
+import CA.CA;
 import sun.lwawt.macosx.CImage;
 import sun.security.util.SecurityConstants;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.InterruptedIOException;
+import java.io.*;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.*;
 import java.sql.SQLSyntaxErrorException;
 
@@ -26,6 +28,8 @@ public class SecureClient {
     private PublicKey publicKey;
 
     private PrivateKey privateKey;
+
+    private String certificate;
 
     public enum Permission {
         checkin, checkout, both, owner
@@ -55,15 +59,22 @@ public class SecureClient {
 
         // generate master key
         try {
-            KeyGenerator gen = KeyGenerator.getInstance("AES");
-            gen.init(128);
-            masterKey = gen.generateKey();
+            Path path = FileSystems.getDefault().getPath(System.getenv("workspace") + name);
+            if (Files.exists(path)) {
 
-            // TODO
-            KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
-            KeyPair keyPair = keyPairGen.generateKeyPair();
-            publicKey = keyPair.getPublic();
-            privateKey = keyPair.getPrivate();
+            }else {
+                File dir = new File(System.getenv("workspace") + name);
+                dir.mkdir();KeyGenerator gen = KeyGenerator.getInstance("AES");
+                gen.init(256);
+                masterKey = gen.generateKey();
+
+                KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
+                KeyPair keyPair = keyPairGen.generateKeyPair();
+                publicKey = keyPair.getPublic();
+                privateKey = keyPair.getPrivate();
+
+                certificate = CA.createCertificate(name, ClientCrypto.keyToString(privateKey));
+            }
         }
         catch (NoSuchAlgorithmException e) {
             e.printStackTrace();

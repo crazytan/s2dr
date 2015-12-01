@@ -3,9 +3,13 @@ package Client;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 /**
  * A helper class for cryptographic operations
@@ -101,6 +105,53 @@ public class ClientCrypto {
             MessageDigest hashTool = MessageDigest.getInstance("SHA-256");
             hashTool.update(text);
             return hashTool.digest();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    //TODO
+    public static String keyToString(PublicKey key) {
+        String keyStr = new String("-----BEGIN PUBLIC KEY-----\n");
+        keyStr = keyStr + new String(key.getEncoded()) + "-----END PUBLIC KEY-----\n";
+        return keyStr;
+    }
+
+    //TODO
+    public static String keyToString(PrivateKey key) {
+        String keyStr = new String("-----BEGIN PRIVATE KEY-----\n");
+        keyStr = keyStr + new String(key.getEncoded()) + "-----END PRIVATE KEY-----\n";
+        return keyStr;
+    }
+
+    //TODO
+    public static PublicKey stringToPublicKey(String string) {
+        try {
+            return KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(string.getBytes()));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    //TODO
+    public static PrivateKey stringToPrivateKey(String string) {
+        try {
+            return KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(string.getBytes()));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    //TODO
+    public static SecretKey stringToAESKey(String string) {
+        try {
+            return new SecretKeySpec(string.getBytes(), 0, string.getBytes().length, "AES");
         }
         catch (Exception e) {
             e.printStackTrace();

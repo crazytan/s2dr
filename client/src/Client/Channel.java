@@ -3,16 +3,26 @@ package Client;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.*;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import CA.CA;
 import Client.ClientCrypto;
 import Client.SecureClient.UID;
 import com.sun.corba.se.spi.activation.IIOP_CLEAR_TEXT;
 import com.google.gson.Gson;
+import com.sun.glass.ui.SystemClipboard;
+import sun.security.rsa.RSAPrivateKeyImpl;
 import sun.security.rsa.RSAPublicKeyImpl;
 
 /**
@@ -103,13 +113,27 @@ public class Channel {
     public static InsecureMessage createChannel(UID clientName, String hostname, SecretKey masterKey, PublicKey publicKey, PrivateKey privateKey) {
         InsecureClient _client = new InsecureClient(discover(hostname));
 
+        //Load Certificate
+        String certificate = "";
+        try{
+            Path path = FileSystems.getDefault().getPath(System.getenv("workspace" + clientName.id + "/certificate"));
+            List<String> crtList = Files.readAllLines(path);
+            crtList.remove(0);
+            crtList.remove(crtList.size() - 1);
+            for (String str : crtList) {
+                certificate = certificate + str;
+            }
+        }
+        catch (Exception e) {
+            System.out.println("Certificate not found!");
+        }
+
         //Phase 1
-        RSAPublicKeyImpl publicKeyImpl = (RSAPublicKeyImpl) publicKey;
-        String sMessage1 = ""; // TODO: publicKey format
+        String sMessage1 = ClientCrypto.keyToString(publicKey);
         byte[] sMessageByte1 = ClientCrypto.doSHA256(sMessage1.getBytes());
         String signature1 = ClientCrypto.toHexString(ClientCrypto.Sign(sMessageByte1, privateKey));
         String response1 = _client.send("init", "{\"phase\":1,\"message\":" + ClientCrypto.toHexString(sMessage1.getBytes()) + "\"," +
-                "\"signature\":\"" + signature1 + "\"," + "\"certificate\":\"" + "" +"\"}");
+                "\"signature\":\"" + signature1 + "\"," + "\"certificate\":\"" + ClientCrypto.toHexString(certificate.getBytes()) +"\"}");
 
         Gson gson = new Gson();
         Map<String, String> map = new HashMap<String, String>();
@@ -117,8 +141,19 @@ public class Channel {
         String rMessage1 = map1.get("message");
         byte[] rMessageByte1 = ClientCrypto.toByte(rMessage1);
 
-        //TODO: check CA
-        PublicKey serverPublicKey = null; // TODO: transfer rMessageByte1 to serverPublicKey
+        String rCrt1 = map1.get("certificate");
+        if (!CA.validateCertificate(rCrt1)) {
+            System.out.println("Certificate invalid in phase 1!");
+            return null;
+        }
+        byte[] serverPublicKeyByte1 = CA.extractPublicKeyFromCertificate(rCrt1);
+        PublicKey serverPublicKey = null;
+        try {
+            serverPublicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(serverPublicKeyByte1));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
         String rSign1 = map1.get("signature");
         byte[] rSignByte1 = ClientCrypto.toByte(rSign1);
@@ -132,8 +167,8 @@ public class Channel {
         String signature2 = null;
         SecretKey clientKey = ClientCrypto.GenerateAESKey(256);
         try {
-            byte[] clientKeyByte = clientKey.toString().getBytes("US-ASCII");
-            sMessage2 = ClientCrypto.toHexString(ClientCrypto.RSAEncrypt(clientKeyByte, serverPublicKey)); //TODO: check encode format
+            byte[] clientKeyByte = clientKey.getEncoded();
+            sMessage2 = ClientCrypto.toHexString(ClientCrypto.RSAEncrypt(clientKeyByte, serverPublicKey));
             byte[] sMessageByte2 = ClientCrypto.doSHA256(sMessage2.getBytes());
             signature2 = ClientCrypto.toHexString(ClientCrypto.Sign(sMessageByte2, privateKey));
         }
@@ -142,13 +177,26 @@ public class Channel {
         }
 
         String response2 = _client.send("init", "{\"phase\":2,\"message\":" + sMessage2 + "\"," +
-                "\"signature\":\"" + signature2 + "\"," + "\"certificate\":\"" + "" +"\"}");
+                "\"signature\":\"" + signature2 + "\"," + "\"certificate\":\"" + ClientCrypto.toHexString(certificate.getBytes()) +"\"}");
 
         Map<String, String> map2 = gson.fromJson(response2, map.getClass());
         String rMessage2 = map2.get("message");
         String rSign2 = map2.get("signature");
+        String rCrt2 = map2.get("certificate");
         byte[] rMessageByte2 = ClientCrypto.toByte(rMessage2);
         byte[] rSignByte2 = ClientCrypto.toByte(rSign2);
+        if (!CA.validateCertificate(rCrt2)) {
+            System.out.println("Certificate invalid in phase 2!");
+            return null;
+        }
+        byte[] serverPublicKeyByte2 = CA.extractPublicKeyFromCertificate(rCrt2);
+
+        try {
+            serverPublicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(serverPublicKeyByte2));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
         if (!Arrays.equals(ClientCrypto.doSHA256(rMessageByte2),ClientCrypto.RSADecrypt(rSignByte2, serverPublicKey))) {
             System.out.println("phase2 signature not match!");
@@ -178,31 +226,41 @@ public class Channel {
         }
 
         String response3 = _client.send("init", "{\"phase\":3,\"message\":" + sMessage3 + "\"," +
-                "\"signature\":\"" + signature3 + "\"," + "\"certificate\":\"" + "" +"\"}");
+                "\"signature\":\"" + signature3 + "\"," + "\"certificate\":\"" + ClientCrypto.toHexString(certificate.getBytes()) +"\"}");
 
         Map<String, String> map3 = gson.fromJson(response3, map.getClass());
         String rMessage3 = map3.get("message");
         String rSign3 = map3.get("signature");
+        String rCrt3 = map3.get("certificate");
         byte[] rMessageByte3 = ClientCrypto.toByte(rMessage3);
         byte[] rSignByte3 = ClientCrypto.toByte(rSign3);
+
+        if (!CA.validateCertificate(rCrt3)) {
+            System.out.println("Certificate invalid in phase 3!");
+            return null;
+        }
+        byte[] serverPublicKeyByte3 = CA.extractPublicKeyFromCertificate(rCrt3);
+
+        try {
+            serverPublicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(serverPublicKeyByte3));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
         if (!Arrays.equals(ClientCrypto.doSHA256(rMessageByte3),ClientCrypto.RSADecrypt(rSignByte3, serverPublicKey))) {
             System.out.println("phase3 signature not match!");
             return null;
         }
 
-        // TODO: symmetric key to channel encryption
         SecretKey key = new SecretKeySpec(sharedKey, 0, sharedKey.length, "AES");
 
-        // TODO: generate identifier
         String identifierStr = identifier.toString();
         String serverIdentifierStr = rMessageByte3.toString();
 
-        // TODO: put a new Channel in the map
          channels.put(clientName, new Channel(key, identifierStr, serverIdentifierStr, _client));
 
 //        InsecureMessage result = InsecureMessage.newMessage();
-        // TODO
         return null;
     }
 
