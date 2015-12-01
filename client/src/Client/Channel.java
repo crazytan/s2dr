@@ -136,6 +136,7 @@ public class Channel {
                 "\"signature\":\"" + signature1 + "\"," + "\"certificate\":\"" + ClientCrypto.toHexString(certificate.getBytes()) +"\"}");
 
         Gson gson = new Gson();
+
         Map<String, String> map = new HashMap<String, String>();
         Map<String, String> map1 = gson.fromJson(response1, map.getClass());
         String rMessage1 = map1.get("message");

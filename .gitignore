@@ -1,2 +1,5 @@
 # CA private key
 CA.key
+
+# CA's serial file
+CA.srl
