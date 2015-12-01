@@ -54,7 +54,6 @@ public class InsecureMessage {
         System.out.println(m);
         System.out.println(m.isSuccess());
         System.out.println(m.getMessage());*/
-<<<<<<< HEAD
         try {
             KeyGenerator keygen = KeyGenerator.getInstance("AES");
             keygen.init(128);
@@ -66,10 +65,8 @@ public class InsecureMessage {
         catch (Exception e) {
             e.printStackTrace();
         }
+
         Map<String, String> map = new HashMap<String, String>();
-=======
-        Map<String, String> map = new HashMap<>();
->>>>>>> master
         map.put("signature", "123");
         map.put("certificate", "{\"signature\":\"456\"}");
         System.out.println(gson.toJson(map));
