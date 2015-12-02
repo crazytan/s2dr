@@ -20,7 +20,7 @@ checkCertificate = function (certificate, res, callback) {
 };
 
 checkSignature = function (body, res, callback) {
-    crypto.checkSignature(body,message, body.signature, body.certificate, function (err) {
+    crypto.checkSignature(body.message, body.signature, body.certificate, function (err) {
         if (err) {
             res.json({
                 result:"1",
