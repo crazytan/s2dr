@@ -113,6 +113,10 @@ public class Channel {
         return null;
     }
 
+    private static String dealNewLine(String string) {
+        return string.replace("\n", "\\n");
+    }
+
     public static InsecureMessage createChannel(UID clientName, String hostname, SecretKey masterKey, PublicKey publicKey, PrivateKey privateKey) {
         InsecureClient _client = new InsecureClient(discover(hostname));
 
@@ -131,8 +135,8 @@ public class Channel {
         String sMessage1 = ClientCrypto.publicKeyToString(publicKey);
         byte[] sMessageByte1 = ClientCrypto.doSHA256(sMessage1.getBytes());
         String signature1 = ClientCrypto.toHexString(ClientCrypto.Sign(sMessageByte1, privateKey));
-        String response1 = _client.send("init", "{\"phase\":1,\"message\":" + sMessage1 + "\"," +
-                "\"signature\":\"" + signature1 + "\"," + "\"certificate\":\"" + certificate +"\"}");
+        String response1 = _client.send("init", "{\"phase\":1,\"message\":\"" + dealNewLine(sMessage1) + "\"," +
+                "\"signature\":\"" + signature1 + "\"," + "\"certificate\":\"" + dealNewLine(certificate) +"\"}");
 
         Gson gson = new Gson();
 
@@ -167,8 +171,8 @@ public class Channel {
             e.printStackTrace();
         }
 
-        String response2 = _client.send("init", "{\"phase\":2,\"message\":" + sMessage2 + "\"," +
-                "\"signature\":\"" + signature2 + "\"," + "\"certificate\":\"" + certificate +"\"}");
+        String response2 = _client.send("init", "{\"phase\":2,\"message\":\"" + dealNewLine(sMessage2) + "\"," +
+                "\"signature\":\"" + signature2 + "\"," + "\"certificate\":\"" + dealNewLine(certificate) +"\"}");
 
         Map<String, String> map2 = gson.fromJson(response2, map.getClass());
         String rMessage2 = map2.get("message");
@@ -207,8 +211,8 @@ public class Channel {
             e.printStackTrace();
         }
 
-        String response3 = _client.send("init", "{\"phase\":3,\"message\":" + sMessage3 + "\"," +
-                "\"signature\":\"" + signature3 + "\"," + "\"certificate\":\"" + certificate +"\"}");
+        String response3 = _client.send("init", "{\"phase\":3,\"message\":\"" + dealNewLine(sMessage3) + "\"," +
+                "\"signature\":\"" + signature3 + "\"," + "\"certificate\":\"" + dealNewLine(certificate) +"\"}");
 
         Map<String, String> map3 = gson.fromJson(response3, map.getClass());
         String rMessage3 = map3.get("message");
