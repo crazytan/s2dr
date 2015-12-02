@@ -142,6 +142,10 @@ public class Channel {
 
         Map<String, String> map = new HashMap<String, String>();
         Map<String, String> map1 = gson.fromJson(response1, map.getClass());
+        String rst1 = map1.get("result");
+        if (!rst1.equals("0")) {
+            return InsecureMessage.errorMessage(map1.get("message"));
+        }
         String rMessage1 = map1.get("message");
         byte[] rMessageByte1 = ClientCrypto.toByte(rMessage1);
 
@@ -175,6 +179,10 @@ public class Channel {
                 "\"signature\":\"" + signature2 + "\"," + "\"certificate\":\"" + dealNewLine(certificate) +"\"}");
 
         Map<String, String> map2 = gson.fromJson(response2, map.getClass());
+        String rst2 = map2.get("result");
+        if (!rst2.equals("0")) {
+            return InsecureMessage.errorMessage(map2.get("message"));
+        }
         String rMessage2 = map2.get("message");
         String rSign2 = map2.get("signature");
         String rCrt2 = map2.get("certificate");
@@ -215,6 +223,10 @@ public class Channel {
                 "\"signature\":\"" + signature3 + "\"," + "\"certificate\":\"" + dealNewLine(certificate) +"\"}");
 
         Map<String, String> map3 = gson.fromJson(response3, map.getClass());
+        String rst3 = map3.get("result");
+        if (!rst3.equals("0")) {
+            return InsecureMessage.errorMessage(map3.get("message"));
+        }
         String rMessage3 = map3.get("message");
         String rSign3 = map3.get("signature");
         String rCrt3 = map3.get("certificate");
@@ -235,10 +247,9 @@ public class Channel {
         String identifierStr = identifier.toString();
         String serverIdentifierStr = rMessageByte3.toString();
 
-         channels.put(clientName, new Channel(key, identifierStr, serverIdentifierStr, _client));
+        channels.put(clientName, new Channel(key, identifierStr, serverIdentifierStr, _client));
 
-//        InsecureMessage result = InsecureMessage.newMessage();
-        return null;
+        return InsecureMessage.successMessage();
     }
 
     private static String discover(String hostname) {
