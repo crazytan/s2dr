@@ -39,23 +39,25 @@ router.post('/', function(req, res) {
         var certificate = req.body.certificate;
         checkCertificate(certificate, res, function () {
             crypto.extractPublicKey(certificate, function (key) {
-                db.insertChannel(crypto.extractSubject(certificate), key, function (err) {
-                    if (err) {
-                        res.json({
-                            result:"1",
-                            message: 'unable to insert into db',
-                            signature: '',
-                            certificate: {}
-                        });
-                    }
-                    else {
-                        res.json({
-                            result:"0",
-                            message: '',
-                            signature: '',
-                            certificate: crypto.getCertificate()
-                        });
-                    }
+                crypto.extractSubject(certificate, function (subject) {
+                    db.insertChannel(subject, key, function (err) {
+                        if (err) {
+                            res.json({
+                                result:"1",
+                                message: 'unable to insert into db',
+                                signature: '',
+                                certificate: {}
+                            });
+                        }
+                        else {
+                            res.json({
+                                result:"0",
+                                message: '',
+                                signature: '',
+                                certificate: crypto.getCertificate()
+                            });
+                        }
+                    });
                 });
             });
         });

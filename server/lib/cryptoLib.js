@@ -123,10 +123,10 @@ exports.extractPublicKey = function (certificate, callback) {
     });
 };
 
-exports.extractSubject = function (certificate) {
-    openssl.exec('x509', new Buffer(certificate), {subject:null, noout: null}, function (err, buffer) {
-        var subject = buffer.toString();
-        return subject.substring(subject.lastIndexOf('=') + 1);
+exports.extractSubject = function (certificate, callback) {
+    return openssl.exec('x509', new Buffer(certificate), {subject:null, noout: null}, function (err, buffer) {
+        var subject = buffer.toString().replace('\n', '');
+        callback(subject.substring(subject.lastIndexOf('=') + 1));
     });
 };
 
