@@ -106,8 +106,7 @@ public class ClientCrypto {
     public static byte[] doSHA256(byte[] text) {
         try {
             MessageDigest hashTool = MessageDigest.getInstance("SHA-256");
-            hashTool.update(text);
-            return hashTool.digest();
+            return hashTool.digest(text);
         }
         catch (Exception e) {
             e.printStackTrace();

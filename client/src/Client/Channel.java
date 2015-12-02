@@ -34,55 +34,12 @@ public class Channel {
         this._client = _client;
     }
 
-    private String encrypt(String plainText) {
-        try {
-            Cipher cipher = getAESCipher();
-            cipher.init(Cipher.ENCRYPT_MODE, key);
-            // TODO
-            byte[] encrypted = cipher.doFinal(plainText.getBytes("US-ASCII"));
-            return new String(encrypted, "US-ASCII");
-        }
-        catch (InvalidKeyException e) {
-            e.printStackTrace();
-            return "";
-        }
-        catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return "";
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    private String decrypt(String cipherText) {
-        try {
-            Cipher cipher = getAESCipher();
-            cipher.init(Cipher.DECRYPT_MODE, key);
-            // TODO
-            byte[] decrypted = cipher.doFinal(cipherText.getBytes("US-ASCII"));
-            return new String(decrypted, "US-ASCII");
-        }
-        catch (InvalidKeyException e) {
-            e.printStackTrace();
-            return "";
-        }
-        catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return "";
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     private SecureMessage send(String route, String message) {
         try {
+            String sMessage = ClientCrypto.toHexString(ClientCrypto.AESEncrypt(message.getBytes(), key));
             String response = _client.send(route,
                     "{\"identifier\":\"" + clientIdentifier + "\"," +
-                    "\"message\":\"" + encrypt(message) + "\"}");
+                    "\"message\":\"" + sMessage + "\"}");
             return SecureMessage.newMessage(response);
         }
         catch (Exception e) {
@@ -91,13 +48,6 @@ public class Channel {
     }
 
     private static Map<UID, Channel> channels = new HashMap<>();
-
-    private static Cipher getAESCipher() {
-        try {
-            return Cipher.getInstance("AES");
-        }
-        catch (Exception e) { return null; }
-    }
 
     private static PublicKey verifyCertAndExtractPublicKey(String certificate) {
         if (!CA.validateCertificate(certificate)) {
@@ -236,7 +186,7 @@ public class Channel {
             return InsecureMessage.errorMessage("phase3 signature not match!");
         }
 
-        SecretKey key = new SecretKeySpec(sharedKey, 0, sharedKey.length, "AES");
+        SecretKey key = new SecretKeySpec(sharedKey, 0, 16, "AES"); // Force key size to 128
 
         channels.put(clientName, new Channel(key, ClientCrypto.toHexString(identifier), rMessage3, _client));
 
@@ -254,7 +204,8 @@ public class Channel {
             if (!m.isSuccess()) return InsecureMessage.errorMessage(m.getMessage());
             if (!m.getIdentifier().equals(channel.serverIdentifier))
                 return InsecureMessage.errorMessage("unrecognized identifier!");
-            return InsecureMessage.newMessage(channel.decrypt(m.getMessage()));
+            String rMessage = new String(ClientCrypto.AESDecrypt(ClientCrypto.toByte(m.getMessage()), channel.key));
+            return InsecureMessage.newMessage(rMessage);
         }
         return InsecureMessage.errorMessage("client name not found!");
     }
