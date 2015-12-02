@@ -105,7 +105,7 @@ exports.checkCertificate = function (certificate) {
 };
 
 exports.getCertificate = function () {
-    return myCert;
+    return myCert.replace(/\n/g, '\\n');
 };
 
 exports.decryptSecureMessage = function (m) {
