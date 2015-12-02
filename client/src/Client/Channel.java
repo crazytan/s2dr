@@ -155,12 +155,6 @@ public class Channel {
             return InsecureMessage.errorMessage("Invalid Certificate in phase 1!");
         }
 
-        String rSign1 = map1.get("signature");
-        byte[] rSignByte1 = ClientCrypto.toByte(rSign1);
-        if (!Arrays.equals(ClientCrypto.doSHA256(rMessageByte1),ClientCrypto.RSADecrypt(rSignByte1, serverPublicKey))) {
-            return InsecureMessage.errorMessage("phase1 signature not match!");
-        }
-
         //Phase 2
         String sMessage2 = null;
         String signature2 = null;

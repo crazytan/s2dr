@@ -97,15 +97,14 @@ exports.generateAESKey = function () {
     return key.toString('hex');
 };
 
-exports.checkCertificate = function (certificate) {
-    openssl.exec('verify', new Buffer(certificate), {trusted: CACertPath}, function (err, buffer) {
-        if (err) return false;
-        return true;
+exports.checkCertificate = function (certificate, callback) {
+    return openssl.exec('verify', new Buffer(certificate), {trusted: CACertPath}, function (err, buffer) {
+        callback(err);
     });
 };
 
 exports.getCertificate = function () {
-    return myCert.replace(/\n/g, '\\n');
+    return myCert;
 };
 
 exports.decryptSecureMessage = function (m) {
@@ -118,9 +117,9 @@ exports.sign = function (m) {
     return myPrivate.encryptPrivate(hash, 'hex', 'hex');
 };
 
-exports.extractPublicKey = function (certificate) {
-    openssl.exec('x509', new Buffer(certificate), {pubkey: null, noout: null}, function (err, buffer) {
-        return buffer.toString();
+exports.extractPublicKey = function (certificate, callback) {
+    return openssl.exec('x509', new Buffer(certificate), {pubkey: null, noout: null}, function (err, buffer) {
+        callback(buffer.toString());
     });
 };
 
@@ -131,12 +130,17 @@ exports.extractSubject = function (certificate) {
     });
 };
 
-exports.checkSignature = function (m, signature, certificate) {
+exports.checkSignature = function (m, signature, certificate, callback) {
     var hash = this.hash(m);
-    var key = new NodeRSA(this.extractPublicKey(certificate), 'pkcs8-public');
-    var base64Sign = new Buffer(signature, 'hex').toString('base64');
-    var decryptedHash = key.decryptPublic(base64Sign, 'hex');
-    return hash === decryptedHash;
+    this.extractPublicKey(certificate, function (keyStr) {
+        var key = new NodeRSA(keyStr, 'pkcs8-public');
+        var base64Sign = new Buffer(signature, 'hex').toString('base64');
+        var decryptedHash = key.decryptPublic(base64Sign, 'hex');
+        if (hash === decryptedHash)
+            callback();
+        else
+            callback(new Error());
+    });
 };
 
 exports.encryptHex = function (m) {
