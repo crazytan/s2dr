@@ -1,19 +1,14 @@
 package Client;
 
 import CA.CA;
-import sun.lwawt.macosx.CImage;
-import sun.security.util.SecurityConstants;
 
-import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.io.*;
-import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.*;
-import java.sql.SQLSyntaxErrorException;
 
 /*
  * A class representing the client side of s2dr service.
@@ -59,22 +54,22 @@ public class SecureClient {
 
         // generate master key
         try {
-            Path path = FileSystems.getDefault().getPath(System.getenv("workspace") + name);
+            Path path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name);
             if (Files.exists(path)) {
                 try {
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + name + "/key.master");
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/key.master");
                     byte[] masterkeyByte = Files.readAllBytes(path);
                     masterKey = ClientCrypto.stringToAESKey(new String(masterkeyByte));
 
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + name + "/key.public");
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/key.public");
                     byte[] publickeyByte = Files.readAllBytes(path);
                     publicKey = ClientCrypto.stringToPublicKey(new String(publickeyByte));
 
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + name + "/key.private");
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/key.private");
                     byte[] privatekeyByte = Files.readAllBytes(path);
                     privateKey = ClientCrypto.stringToPrivateKey(new String(privatekeyByte));
 
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + name + "/certificate");
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/certificate");
                     byte[] certificateByte = Files.readAllBytes(path);
                     certificate = new String(certificateByte);
                 }
@@ -82,7 +77,7 @@ public class SecureClient {
                     e.printStackTrace();
                 }
             }else {
-                File dir = new File(System.getenv("workspace") + name);
+                File dir = new File(System.getenv("workspace") + "/" + name);
                 dir.mkdir();KeyGenerator gen = KeyGenerator.getInstance("AES");
                 gen.init(256);
                 masterKey = gen.generateKey();
@@ -96,13 +91,13 @@ public class SecureClient {
 
                 //save to disk
                 try {
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + name + "/key.master");
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/key.master");
                     Files.write(path, ClientCrypto.aesKeyToString(masterKey).getBytes());
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + name + "/key.public");
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/key.public");
                     Files.write(path, ClientCrypto.publicKeyToString(publicKey).getBytes());
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + name + "/key.private");
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/key.private");
                     Files.write(path, ClientCrypto.privateKeyToString(privateKey).getBytes());
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + name + "/certificate");
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/certificate");
                     Files.write(path, certificate.getBytes());
                 }
                 catch (Exception e) {

@@ -1,0 +1,36 @@
+<project name="s2dr" default="test" basedir=".">
+  <!-- set global properties -->
+  <property name="src" location="src"/>
+  <property name="lib" location="lib"/>
+  <property name="build" location="build"/>
+
+  <target name="init">
+    <tstamp/>
+    <mkdir dir="${build}"/>
+  </target>
+
+  <target name="compile" depends="init">
+    <javac srcdir="${src}" destdir="${build}"
+           classpath="${lib}/bson-3.0.4.jar:${lib}/gson-2.4.jar:${lib}/mongodb-driver-3.0.4.jar:${lib}/mongodb-driver-core-3.0.4.jar"/>
+  </target>
+
+  <target name="jar" depends="compile">
+    <jar basedir="${build}" destfile="s2dr.jar">
+      <manifest>
+        <attribute name="Main-Class" value="Test.Test"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="test" depends="jar">
+    <java classpath="s2dr.jar" classname="Test.Test" fork="true">
+      <env key="workspace" value="/Users/tan/Workspace/s2dr/client/workspace"/>
+      <env key="root" value="/Users/tan/Workspace/s2dr"/>
+    </java>
+    <delete dir="${build}"/>
+  </target>
+
+  <target name="clean">
+    <delete dir="${build}"/>
+  </target>
+</project>

@@ -5,3 +5,7 @@
 out/
 
 lib/
+
+build/
+
+*.jar

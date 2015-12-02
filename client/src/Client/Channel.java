@@ -3,25 +3,16 @@ package Client;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.*;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 
 import CA.CA;
-import Client.ClientCrypto;
 import Client.SecureClient.UID;
-import com.sun.corba.se.spi.activation.IIOP_CLEAR_TEXT;
 import com.google.gson.Gson;
-import com.sun.glass.ui.SystemClipboard;
-import sun.security.rsa.RSAPrivateKeyImpl;
-import sun.security.rsa.RSAPublicKeyImpl;
 
 /**
  * A secure channel used by client
