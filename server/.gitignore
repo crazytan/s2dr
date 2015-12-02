@@ -2,10 +2,10 @@
 .idea/
 
 # database folder
-data/
+data/*
 
 # document folder
-docs/
+docs/*
 
 # nodejs modules
 node_modules/
