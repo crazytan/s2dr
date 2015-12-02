@@ -90,7 +90,7 @@ public class Channel {
         }
     }
 
-    private static Map<UID, Channel> channels;
+    private static Map<UID, Channel> channels = new HashMap<>();
 
     private static Cipher getAESCipher() {
         try {
