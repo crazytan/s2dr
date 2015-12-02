@@ -78,7 +78,9 @@ public class SecureClient {
                 }
             }else {
                 File dir = new File(System.getenv("workspace") + "/" + name);
-                dir.mkdir();KeyGenerator gen = KeyGenerator.getInstance("AES");
+                dir.mkdir();
+
+                KeyGenerator gen = KeyGenerator.getInstance("AES");
                 gen.init(256);
                 masterKey = gen.generateKey();
 
@@ -93,10 +95,13 @@ public class SecureClient {
                 try {
                     path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/key.master");
                     Files.write(path, ClientCrypto.aesKeyToString(masterKey).getBytes());
+
                     path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/key.public");
                     Files.write(path, ClientCrypto.publicKeyToString(publicKey).getBytes());
+
                     path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/key.private");
                     Files.write(path, ClientCrypto.privateKeyToString(privateKey).getBytes());
+
                     path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/certificate");
                     Files.write(path, certificate.getBytes());
                 }

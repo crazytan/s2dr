@@ -119,7 +119,7 @@ public class ClientCrypto {
         String multiLinesStr = "";
         while (string.length() > 64) {
             multiLinesStr = multiLinesStr + string.substring(0, 64) + "\n";
-            string = string.substring(64, string.length() - 1);
+            string = string.substring(64, string.length());
         }
         multiLinesStr = multiLinesStr + string + "\n";
         return multiLinesStr;
@@ -127,10 +127,8 @@ public class ClientCrypto {
 
     public static String publicKeyToString(PublicKey key) {
         byte[] keyByte = Base64.getEncoder().encode(key.getEncoded());
-        Base64.getDecoder().decode(keyByte);
         String keyStr = new String(keyByte);
-        Base64.getDecoder().decode(keyStr.getBytes());
-        return "-----BEGIN PUBLIC KEY-----\n" + devideToLines(keyStr) + "-----END PUBLIC KEY-----";
+        return "-----BEGIN PUBLIC KEY-----\n" + devideToLines(keyStr) + "-----END PUBLIC KEY-----\n";
     }
 
     public static String privateKeyToString(PrivateKey key) {
@@ -150,7 +148,6 @@ public class ClientCrypto {
             string =  string.replace("-----BEGIN PUBLIC KEY-----\n", "");
             string =  string.replace("-----END PUBLIC KEY-----", "");
             string =  string.replace("\n", "");
-            System.out.println(string);
             byte[] keyByte = Base64.getDecoder().decode(string.getBytes());
             return KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(keyByte));
         }
