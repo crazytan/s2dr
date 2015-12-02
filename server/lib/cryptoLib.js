@@ -13,8 +13,8 @@ var crypto = require('crypto'),
     myCert = '', // server's certificate
     CACert = ''; // CA's certificate
 
-var aesKeyLen = 256,  // # of bits of AES key
-    aesAlgorithm = 'aes-256-ctr',
+var aesKeyLen = 128,  // # of bits of AES key
+    aesAlgorithm = 'aes-128-ecb',
     hashAlgorithm = 'sha256',
     CAPublicPath = '../CA.pub', // path of CA's public key
     CAPrivatePath = '../CA.key', // path of CA's private key
