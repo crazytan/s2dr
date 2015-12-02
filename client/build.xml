@@ -3,6 +3,8 @@
   <property name="src" location="src"/>
   <property name="lib" location="lib"/>
   <property name="build" location="build"/>
+  <property name="workspace" location="./workspace"/>
+  <property name="root" location="../"/>
 
   <target name="init">
     <tstamp/>
@@ -10,8 +12,14 @@
   </target>
 
   <target name="compile" depends="init">
-    <javac srcdir="${src}" destdir="${build}"
-           classpath="${lib}/bson-3.0.4.jar:${lib}/gson-2.4.jar:${lib}/mongodb-driver-3.0.4.jar:${lib}/mongodb-driver-core-3.0.4.jar"/>
+    <path id="libraries">
+      <fileset dir="${lib}">
+        <include name="*.jar"/>
+      </fileset>
+    </path>
+    <javac srcdir="${src}" destdir="${build}">
+      <classpath refid="libraries"/>
+    </javac>
   </target>
 
   <target name="jar" depends="compile">
@@ -20,14 +28,14 @@
         <attribute name="Main-Class" value="Test.Test"/>
       </manifest>
     </jar>
+    <delete dir="${build}"/>
   </target>
 
   <target name="test" depends="jar">
     <java classpath="s2dr.jar" classname="Test.Test" fork="true">
-      <env key="workspace" value="/Users/tan/Workspace/s2dr/client/workspace"/>
-      <env key="root" value="/Users/tan/Workspace/s2dr"/>
+      <env key="workspace" value="${workspace}"/>
+      <env key="root" value="${root}"/>
     </java>
-    <delete dir="${build}"/>
   </target>
 
   <target name="clean">
