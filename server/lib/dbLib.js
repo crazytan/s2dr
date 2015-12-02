@@ -185,7 +185,7 @@ exports.insertChannel = function (subject, publicKey, callback) {
 
 exports.getChannelByClient = function (publicKey, callback) {
     getDocument('channels', {clientPublicKey: publicKey}, callback);
-}
+};
 
 _updateChannel = function (db, channel, callback) {
     db.collection('channels').updateOne(

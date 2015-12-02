@@ -108,8 +108,8 @@ exports.getCertificate = function () {
 };
 
 exports.decryptSecureMessage = function (m) {
-    var base64M = new Buffer(m, 'hex').toString('base64');
-    return myPrivate.decrypt(base64M);
+    var buf = new Buffer(m, 'hex');
+    return myPrivate.decrypt(buf);
 };
 
 exports.sign = function (m) {
