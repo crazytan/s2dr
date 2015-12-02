@@ -161,7 +161,8 @@ public class Channel {
         SecretKey clientKey = ClientCrypto.GenerateAESKey(256);
         try {
             byte[] clientKeyByte = clientKey.getEncoded();
-            sMessage2 = ClientCrypto.toHexString(ClientCrypto.RSAEncrypt(clientKeyByte, serverPublicKey));
+            byte[] crypto = ClientCrypto.RSAEncrypt(clientKeyByte, serverPublicKey);
+            sMessage2 = ClientCrypto.toHexString(crypto);
             byte[] sMessageByte2 = ClientCrypto.doSHA256(sMessage2.getBytes());
             signature2 = ClientCrypto.toHexString(ClientCrypto.Sign(sMessageByte2, privateKey));
         }
@@ -187,7 +188,7 @@ public class Channel {
             return InsecureMessage.errorMessage("Certificate invalid in phase 2!");
         }
 
-        if (!Arrays.equals(ClientCrypto.doSHA256(rMessageByte2),ClientCrypto.RSADecrypt(rSignByte2, serverPublicKey))) {
+        if (!Arrays.equals(ClientCrypto.doSHA256(rMessage2.getBytes()),ClientCrypto.RSADecrypt(rSignByte2, serverPublicKey))) {
             return InsecureMessage.errorMessage("phase2 signature not match!");
         }
 
@@ -232,7 +233,7 @@ public class Channel {
             return InsecureMessage.errorMessage("Certificate invalid in phase 3!");
         }
 
-        if (!Arrays.equals(ClientCrypto.doSHA256(rMessageByte3),ClientCrypto.RSADecrypt(rSignByte3, serverPublicKey))) {
+        if (!Arrays.equals(ClientCrypto.doSHA256(rMessage3.getBytes()),ClientCrypto.RSADecrypt(rSignByte3, serverPublicKey))) {
             return InsecureMessage.errorMessage("phase3 signature not match!");
         }
 

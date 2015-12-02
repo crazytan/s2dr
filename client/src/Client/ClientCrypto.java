@@ -197,7 +197,7 @@ public class ClientCrypto {
 
     public static String toHexString(byte[] text) {
         int len = text.length;
-        String rst = new String();
+        String rst = "";
         for (int i = 0; i < len; ++i) {
             rst = rst + ClientCrypto.intToString((text[i] >> 4) & (byte)0x0f) + ClientCrypto.intToString(text[i] & (byte)0x0f);
         }
