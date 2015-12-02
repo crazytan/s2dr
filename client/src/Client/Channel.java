@@ -225,7 +225,6 @@ public class Channel {
         String rMessage3 = map3.get("message");
         String rSign3 = map3.get("signature");
         String rCrt3 = map3.get("certificate");
-        byte[] rMessageByte3 = ClientCrypto.toByte(rMessage3);
         byte[] rSignByte3 = ClientCrypto.toByte(rSign3);
 
         serverPublicKey = verifyCertAndExtractPublicKey(rCrt3);
@@ -239,10 +238,7 @@ public class Channel {
 
         SecretKey key = new SecretKeySpec(sharedKey, 0, sharedKey.length, "AES");
 
-        String identifierStr = identifier.toString();
-        String serverIdentifierStr = rMessageByte3.toString();
-
-        channels.put(clientName, new Channel(key, identifierStr, serverIdentifierStr, _client));
+        channels.put(clientName, new Channel(key, ClientCrypto.toHexString(identifier), rMessage3, _client));
 
         return InsecureMessage.successMessage();
     }
