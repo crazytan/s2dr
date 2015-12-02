@@ -119,19 +119,19 @@ public class Channel {
         //Load Certificate
         String certificate = "";
         try{
-            Path path = FileSystems.getDefault().getPath(System.getenv("workspace" + clientName.id + "/certificate"));
+            Path path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + clientName.id + "/certificate");
             byte[] crtByte = Files.readAllBytes(path);
             certificate = new String(crtByte);
         }
         catch (Exception e) {
-            System.out.println("Certificate not found!");
+            return InsecureMessage.errorMessage("Certificate not found!");
         }
 
         //Phase 1
         String sMessage1 = ClientCrypto.publicKeyToString(publicKey);
         byte[] sMessageByte1 = ClientCrypto.doSHA256(sMessage1.getBytes());
         String signature1 = ClientCrypto.toHexString(ClientCrypto.Sign(sMessageByte1, privateKey));
-        String response1 = _client.send("init", "{\"phase\":1,\"message\":" + ClientCrypto.toHexString(sMessage1.getBytes()) + "\"," +
+        String response1 = _client.send("init", "{\"phase\":1,\"message\":" + sMessage1 + "\"," +
                 "\"signature\":\"" + signature1 + "\"," + "\"certificate\":\"" + certificate +"\"}");
 
         Gson gson = new Gson();
@@ -144,14 +144,13 @@ public class Channel {
         String rCrt1 = map1.get("certificate");
         PublicKey serverPublicKey = verifyCertAndExtractPublicKey(rCrt1);
         if (serverPublicKey == null) {
-            System.out.println("Invalid Certificate in phase 1!");
+            return InsecureMessage.errorMessage("Invalid Certificate in phase 1!");
         }
 
         String rSign1 = map1.get("signature");
         byte[] rSignByte1 = ClientCrypto.toByte(rSign1);
         if (!Arrays.equals(ClientCrypto.doSHA256(rMessageByte1),ClientCrypto.RSADecrypt(rSignByte1, serverPublicKey))) {
-            System.out.println("phase1 signature not match!");
-            return null;
+            return InsecureMessage.errorMessage("phase1 signature not match!");
         }
 
         //Phase 2
@@ -179,12 +178,11 @@ public class Channel {
         byte[] rSignByte2 = ClientCrypto.toByte(rSign2);
         serverPublicKey = verifyCertAndExtractPublicKey(rCrt2);
         if (serverPublicKey == null) {
-            System.out.println("Certificate invalid in phase 2!");
+            return InsecureMessage.errorMessage("Certificate invalid in phase 2!");
         }
 
         if (!Arrays.equals(ClientCrypto.doSHA256(rMessageByte2),ClientCrypto.RSADecrypt(rSignByte2, serverPublicKey))) {
-            System.out.println("phase2 signature not match!");
-            return null;
+            return InsecureMessage.errorMessage("phase2 signature not match!");
         }
 
         byte[] xorKeys = new byte[256];
@@ -221,12 +219,11 @@ public class Channel {
 
         serverPublicKey = verifyCertAndExtractPublicKey(rCrt3);
         if (serverPublicKey == null) {
-            System.out.println("Certificate invalid in phase 3!");
+            return InsecureMessage.errorMessage("Certificate invalid in phase 3!");
         }
 
         if (!Arrays.equals(ClientCrypto.doSHA256(rMessageByte3),ClientCrypto.RSADecrypt(rSignByte3, serverPublicKey))) {
-            System.out.println("phase3 signature not match!");
-            return null;
+            return InsecureMessage.errorMessage("phase3 signature not match!");
         }
 
         SecretKey key = new SecretKeySpec(sharedKey, 0, sharedKey.length, "AES");
