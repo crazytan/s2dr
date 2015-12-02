@@ -158,7 +158,7 @@ public class Channel {
         //Phase 2
         String sMessage2 = null;
         String signature2 = null;
-        SecretKey clientKey = ClientCrypto.GenerateAESKey(256);
+        SecretKey clientKey = ClientCrypto.GenerateAESKey(128);
         try {
             byte[] clientKeyByte = clientKey.getEncoded();
             byte[] crypto = ClientCrypto.RSAEncrypt(clientKeyByte, serverPublicKey);
@@ -192,17 +192,17 @@ public class Channel {
             return InsecureMessage.errorMessage("phase2 signature not match!");
         }
 
-        byte[] xorKeys = new byte[256];
+        byte[] xorKeys = new byte[16];
         byte[] clientKeyByte = clientKey.getEncoded();
-        for (int i = 0; i < 256; ++i) {
+        for (int i = 0; i < 16; ++i) {
             xorKeys[i] = (byte)(clientKeyByte[i] | rMessageByte2[i]);
         }
 
         //Phase 3
         byte[] sharedKey = null;
         byte[] identifier = null;
-        String sMessage3 = null;
-        String signature3 = null;
+        String sMessage3 = "";
+        String signature3 = "";
         try {
             sharedKey = ClientCrypto.doSHA256(xorKeys);
             identifier = ClientCrypto.AESEncrypt(sharedKey, masterKey);

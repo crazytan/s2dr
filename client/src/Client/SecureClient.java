@@ -81,7 +81,7 @@ public class SecureClient {
                 dir.mkdir();
 
                 KeyGenerator gen = KeyGenerator.getInstance("AES");
-                gen.init(256);
+                gen.init(128);
                 masterKey = gen.generateKey();
 
                 KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");

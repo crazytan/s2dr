@@ -33,7 +33,7 @@ public class ClientCrypto {
 
     public static byte[] AESEncrypt(byte[] text, SecretKey key) {
         try {
-            Cipher cipher = Cipher.getInstance("AES");
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, key);
             return cipher.doFinal(text);
         }
@@ -45,7 +45,7 @@ public class ClientCrypto {
 
     public static byte[] AESDecrypt(byte[] text, SecretKey key) {
         try {
-            Cipher cipher = Cipher.getInstance("AES");
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cipher.init(Cipher.DECRYPT_MODE, key);
             return cipher.doFinal(text);
         }
