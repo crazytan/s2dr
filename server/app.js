@@ -26,7 +26,7 @@ var decrypt = express.Router().post('/', function(req, res, next) {
         db.getChannel(req.body.identifier, function (err, channel) {
             if (err) {
                 res.json({
-                    result: 1,
+                    result:"1",
                     identifier: null,
                     message: 'invalid identifier!'
                 });
@@ -45,7 +45,7 @@ var decrypt = express.Router().post('/', function(req, res, next) {
 var encrypt = express.Router().post('/', function(req, res) {
     if (debug) {
         res.json({
-            result: 0,
+            result:"0",
             identifier: '',
             message: JSON.stringify(req.s2dr.response)
         });
@@ -54,7 +54,7 @@ var encrypt = express.Router().post('/', function(req, res) {
         var plainText = JSON.stringify(req.s2dr.response);
         var cipherText = crypto.encryptMessage(plainText, req.s2dr.channel.key);
         res.json({
-            result: 0,
+            result:"0",
             identifier: req.s2dr.channel.myID,
             message: cipherText
         });
@@ -81,7 +81,7 @@ app.use('/test', express.Router().post('/', function (req, res) {
 // catch 404 and return error message
 app.use(function(req, res, next) {
     res.json({
-        result: 1,
+        result:"1",
         identifier: null,
         message: 'url or method error!'
     });

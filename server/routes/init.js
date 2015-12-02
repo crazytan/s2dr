@@ -8,7 +8,7 @@ checkCertificate = function (certificate, res) {
     var isValid = crypto.checkCertificate(certificate);
     if (!isValid) {
         res.json({
-            result:1,
+            result:"1",
             message: 'certificate not valid',
             signature:'',
             certificate:{}
@@ -20,7 +20,7 @@ checkSignature = function (body, res) {
     var isValid = crypto.checkSignature(body,message, body.signature, body.certificate);
     if (!isValid) {
         res.json({
-            result:1,
+            result:"1",
             message: 'signature not valid',
             signature:'',
             certificate:{}
@@ -36,7 +36,7 @@ router.post('/', function(req, res) {
             db.insertChannel(crypto.extractSubject(certificate), crypto.extractPublicKey(certificate), function (err) {
                 if (err) {
                     res.json({
-                        result: 1,
+                        result:"1",
                         message: 'unable to insert into db',
                         signature: '',
                         certificate: {}
@@ -44,7 +44,7 @@ router.post('/', function(req, res) {
                 }
                 else {
                     res.json({
-                        result: 0,
+                        result:"0",
                         message: '',
                         signature: '',
                         certificate: crypto.getCertificate()
@@ -61,7 +61,7 @@ router.post('/', function(req, res) {
             db.getChannelByClient(crypto.extractPublicKey(certificate), function (err, channel) {
                 if (err) {
                     res.json({
-                        result: 1,
+                        result:"1",
                         message: 'unable to get channel information',
                         signature: '',
                         certificate: {}
@@ -72,7 +72,7 @@ router.post('/', function(req, res) {
                     var _J = new Buffer(crypto.generateAESKey(), 'hex');
                     if (J.length !== _J.length) { //TODO: verify length of decrypted key
                         res.json({
-                            result: 1,
+                            result:"1",
                             message: 'key size does not match',
                             signature: '',
                             certificate: {}
@@ -84,7 +84,7 @@ router.post('/', function(req, res) {
                     db.updateChannel(channel, function (err) {
                         if (err) {
                             res.json({
-                                result: 1,
+                                result:"1",
                                 message: 'unable to insert key into db',
                                 signature: '',
                                 certificate: {}
@@ -94,7 +94,7 @@ router.post('/', function(req, res) {
                             var clientKey = new NodeRSA(channel.clientPublicKey, 'pkcs8-public');
                             var encryptedKey = clientKey.encrypt(keyBuf, 'hex');
                             res.json({
-                                result: 0,
+                                result:"0",
                                 message: encryptedKey,
                                 signature: crypto.sign(encryptedKey),
                                 certificate: crypto.getCertificate()
@@ -113,7 +113,7 @@ router.post('/', function(req, res) {
             db.getChannelByClient(crypto.extractPublicKey(certificate), function (err, channel) {
                 if (err) {
                     res.json({
-                        result: 1,
+                        result:"1",
                         message: 'unable to get channel information',
                         signature: '',
                         certificate: {}
@@ -125,7 +125,7 @@ router.post('/', function(req, res) {
                     db.updateChannel(channel, function (err) {
                         if (err) {
                             res.json({
-                                result: 1,
+                                result:"1",
                                 message: 'unable to insert identifier into db',
                                 signature: '',
                                 certificate: {}
@@ -133,7 +133,7 @@ router.post('/', function(req, res) {
                         }
                         else {
                             res.json({
-                                result: 0,
+                                result:"0",
                                 message: channel.myID,
                                 signature: crypto.sign(channel.myID),
                                 certificate: crypto.getCertificate()
@@ -146,7 +146,7 @@ router.post('/', function(req, res) {
     }
     else {
         res.json({
-            result:1,
+            result:"1",
             message:'phase number error',
             signature:'',
             certificate:{}
