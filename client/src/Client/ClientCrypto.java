@@ -57,7 +57,7 @@ public class ClientCrypto {
 
     public static byte[] RSAEncrypt(byte[] text, PublicKey key) {
         try {
-            Cipher cipher = Cipher.getInstance("RSA");
+            Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-1AndMGF1Padding");
             cipher.init(Cipher.ENCRYPT_MODE, key);
             return  cipher.doFinal(text);
         }
