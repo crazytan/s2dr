@@ -89,7 +89,7 @@ router.post('/', function(req, res) {
                             }
                             var keyBuf = new Buffer(J.length);
                             for (var i = 0; i < keyBuf.length; i++) keyBuf[i] = J[i] ^ _J[i]; // calculate J xor _J
-                            channel.key = crypto.hash(keyBuf.toString('hex'));
+                            channel.key = crypto.hash(keyBuf.toString('hex')).substring(0, 32);
                             db.updateChannel(channel, function (err) {
                                 if (err) {
                                     res.json({
