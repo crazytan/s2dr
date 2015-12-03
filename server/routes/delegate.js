@@ -14,7 +14,7 @@ router.post('/', function(req, res, next) {
             next();
         }
         else {
-            doc.checkDelegate(req.s2dr.message, meta.acl, function (err, entry) {
+            doc.checkDelegate(req.s2dr.channel.clientName, req.s2dr.message, meta.acl, function (err, ace) {
                 if (err) {
                     response.result = 1;
                     response.message = 'unable to delegate: permission denied!';

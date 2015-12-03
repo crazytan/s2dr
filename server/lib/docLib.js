@@ -67,11 +67,11 @@ exports.checkPermit = function (acl, client, operation) {
     return false;
 };
 
-exports.checkDelegate = function (message, acl, callback) {
+exports.checkDelegate = function (name, message, acl, callback) {
     var _acl = filterExpired(acl);
     var found = false;
     for (var i = 0;i < _acl.length;i++) {
-        if (((_acl[i].name === message.client) || (_acl[i].name === 'all')) && contains(_acl[i].permission, message.permission) && _acl[i].propagation) {
+        if (((_acl[i].name === name) || (_acl[i].name === 'all')) && contains(_acl[i].permission, message.permission) && _acl[i].propagation) {
             found = true;
             callback(null, _acl[i]);
         }
