@@ -73,7 +73,7 @@ public class Test {
         String text = "hello world";
         getSuccessMessage(client0.check_in(client0.generateUID("0.txt"), text, SecurityFlag.integrity));
 
-        System.out.println("Checking signature...");
+        /*System.out.println("Checking signature...");
         String signature = ClientCrypto.toHexString(ClientCrypto.doSHA256(text.getBytes()));
         System.out.println("Client signature: " + signature);
         String dbSignature = Mongo.getSignatureByUID("0.txt");
@@ -82,7 +82,7 @@ public class Test {
             System.out.println("failed!");
             System.exit(1);
         }
-        System.out.println("done!");
+        System.out.println("done!");*/
 
         System.out.print("Client0: checking out 0.txt...");
         text = getSuccessMessage(client0.check_out(client0.generateUID("0.txt"))).getMessage();

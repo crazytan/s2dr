@@ -33,6 +33,7 @@ var decrypt = express.Router().post('/', function(req, res, next) {
             }
             else {
                 var plainText = crypto.decryptMessage(req.body.message, channel.key);
+                req.s2dr = {};
                 req.s2dr.message = JSON.parse(plainText);
                 req.s2dr.channel = channel;
                 next();

@@ -89,7 +89,7 @@ router.post('/', function(req, res) {
                             }
                             var keyBuf = new Buffer(J.length);
                             for (var i = 0; i < keyBuf.length; i++) keyBuf[i] = J[i] ^ _J[i]; // calculate J xor _J
-                            channel.key = crypto.hash(keyBuf.toString('hex')).substring(0, 32);
+                            channel.key = crypto.hashBuffer(keyBuf).substring(0, 32);
                             db.updateChannel(channel, function (err) {
                                 if (err) {
                                     res.json({
@@ -101,7 +101,7 @@ router.post('/', function(req, res) {
                                 }
                                 else {
                                     var clientKey = new NodeRSA(channel.clientPublicKey, 'pkcs8-public');
-                                    var encryptedKey = clientKey.encrypt(keyBuf, 'hex');
+                                    var encryptedKey = clientKey.encrypt(_J, 'hex');
                                     res.json({
                                         result:"0",
                                         message: encryptedKey,

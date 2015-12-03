@@ -50,16 +50,16 @@ exports.init = function () {
 
 // return decrypted string in HEX
 exports.decryptMessage = function (m, key) {
-    var cipher = crypto.createDecipher(aesAlgorithm, new Buffer(key, 'hex'));
-    var decrypted = cipher.update(m.toString('hex'), 'hex', 'utf8');
+    var cipher = crypto.createDecipheriv(aesAlgorithm, new Buffer(key, 'hex'), '');
+    var decrypted = cipher.update(new Buffer(m, 'hex'), '', 'utf8');
     decrypted += cipher.final('utf8');
     return decrypted;
 };
 
 // return encrypted string in HEX
 exports.encryptMessage = function (m, key) {
-    var cipher = crypto.createCipher(aesAlgorithm, key);
-    var encrypted = cipher.update(m, 'utf8', 'hex');
+    var cipher = crypto.createCipheriv(aesAlgorithm, new Buffer(key, 'hex'), '');
+    var encrypted = cipher.update(new Buffer(m), '', 'hex');
     encrypted += cipher.final('hex');
     return encrypted;
 };
@@ -89,6 +89,12 @@ exports.encryptKey = function (key) {
 exports.hash = function (m) {
     var shasum = crypto.createHash(hashAlgorithm);
     shasum.update(m.toString('binary'), 'binary');
+    return shasum.digest('hex');
+};
+
+exports.hashBuffer = function (buf) {
+    var shasum = crypto.createHash(hashAlgorithm);
+    shasum.update(buf);
     return shasum.digest('hex');
 };
 
