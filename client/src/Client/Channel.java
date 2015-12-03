@@ -131,7 +131,7 @@ public class Channel {
         String rMessage2 = map2.get("message");
         String rSign2 = map2.get("signature");
         String rCrt2 = map2.get("certificate");
-        byte[] rMessageByte2 = ClientCrypto.toByte(rMessage2);
+        byte[] rMessageByte2 = ClientCrypto.RSADecrypt(ClientCrypto.toByte(rMessage2), privateKey);
         byte[] rSignByte2 = ClientCrypto.toByte(rSign2);
         serverPublicKey = verifyCertAndExtractPublicKey(rCrt2);
         if (serverPublicKey == null) {
@@ -145,7 +145,7 @@ public class Channel {
         byte[] xorKeys = new byte[16];
         byte[] clientKeyByte = clientKey.getEncoded();
         for (int i = 0; i < 16; ++i) {
-            xorKeys[i] = (byte)(clientKeyByte[i] | rMessageByte2[i]);
+            xorKeys[i] = (byte)(clientKeyByte[i] ^ rMessageByte2[i]);
         }
 
         //Phase 3

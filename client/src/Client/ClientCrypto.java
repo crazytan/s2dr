@@ -69,7 +69,7 @@ public class ClientCrypto {
 
     public static byte[] RSADecrypt(byte[] cipherText, PrivateKey key) {
         try {
-            Cipher cipher = Cipher.getInstance("RSA");
+            Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-1AndMGF1Padding");
             cipher.init(Cipher.DECRYPT_MODE, key);
             return cipher.doFinal(cipherText);
         }
