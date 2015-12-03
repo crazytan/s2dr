@@ -174,7 +174,7 @@ public class Test {
         System.out.print("Client2: checking out 1.txt...");
         getErrorMessage(client2.check_out(client2.generateUID("1.txt")));
 
-        Sleep(60);
+        Sleep(30);
         System.out.print("Client2: checking out 1.txt...");
         getErrorMessage(client2.check_out(client2.generateUID("1.txt")));
 

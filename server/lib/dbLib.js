@@ -146,7 +146,7 @@ exports.delegate = function (message, acl, ace, callback) {
     var _ace = {
         name: message.client,
         timestamp: now,
-        lifetime: ace.lifetime <= 0 ? message.time : Math.min(message.time, (now - ace.timestamp) / 1000),
+        lifetime: ace.lifetime <= 0 ? message.time : Math.min(message.time, ace.lifetime - ((now - ace.timestamp) / 1000)),
         signature: '',
         permission: message.permission,
         propagation: message.flag != 0
