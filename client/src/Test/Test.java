@@ -49,6 +49,15 @@ public class Test {
         return message;
     }
 
+    private static void Sleep(int numSeconds) throws Exception {
+        System.out.print("sleep " + numSeconds + " seconds");
+        for (int i = 0;i < numSeconds;i++) {
+            Thread.sleep(1000);
+            System.out.print('.');
+        }
+        System.out.println();
+    }
+
     private static void initialize() {
         System.out.print("Creating client_0...");
         client0 = new SecureClient("client_0");
@@ -143,8 +152,7 @@ public class Test {
         System.out.print("Client2: checking out 1.txt...");
         getErrorMessage(client2.check_out(client2.generateUID("1.txt")));
 
-        System.out.println("sleep 30 seconds...");
-        Thread.sleep(30000);
+        Sleep(30);
         System.out.print("Client1: checking out 1.txt...");
         getErrorMessage(client1.check_out(client1.generateUID("1.txt")));
 
@@ -162,13 +170,11 @@ public class Test {
         System.out.println("message: " + text);
         saveFile("client_2", "1_copy2.txt", text);
 
-        System.out.println("sleep 30 seconds...");
-        Thread.sleep(30000);
+        Sleep(30);
         System.out.print("Client2: checking out 1.txt...");
         getErrorMessage(client2.check_out(client2.generateUID("1.txt")));
 
-        System.out.println("sleep 60 seconds...");
-        Thread.sleep(60000);
+        Sleep(60);
         System.out.print("Client2: checking out 1.txt...");
         getErrorMessage(client2.check_out(client2.generateUID("1.txt")));
 
