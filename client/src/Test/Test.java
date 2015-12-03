@@ -6,10 +6,13 @@ import Client.SecureClient;
 import Client.SecureClient.SecurityFlag;
 import Client.SecureClient.Permission;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.*;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.PrivateKey;
 
 /**
  * Test script
@@ -17,6 +20,8 @@ import java.io.IOException;
 public class Test {
 
     private static final File workspace = new File(System.getenv("workspace"));
+
+    private static final File root = new File(System.getenv("root"));
 
     private static SecureClient client0;
 
@@ -58,6 +63,31 @@ public class Test {
         System.out.println();
     }
 
+    private static void checkSignature(String text, String UID) throws Exception {
+        System.out.println("Checking signature...");
+
+        String mySignature = ClientCrypto.toHexString(ClientCrypto.doSHA256(text.getBytes()));
+        System.out.println("Client signature: " + mySignature);
+
+        String dbSignature = Mongo.getSignatureByUID("0.txt");
+        String encryptedKey = Mongo.getKeyByUID("0.txt");
+
+        Path path = FileSystems.getDefault().getPath(root + "/server/server.key");
+        byte[] keyBytes = Files.readAllBytes(path);
+        PrivateKey serverKey = ClientCrypto.stringToPrivateKey(new String(keyBytes));
+        byte[] decryptedKey = ClientCrypto.RSADecrypt(encryptedKey.getBytes(), serverKey);
+        SecretKey key = new SecretKeySpec(decryptedKey, "AES");
+        byte[] decryptedSignature = ClientCrypto.AESDecrypt(dbSignature.getBytes(), key);
+
+        System.out.println("Server signature: " + new String(decryptedSignature));
+
+        if (!mySignature.equals(new String(decryptedSignature))) {
+            System.out.println("failed!");
+            System.exit(1);
+        }
+        System.out.println("done!");
+    }
+
     private static void initialize() {
         System.out.print("Creating client_0...");
         client0 = new SecureClient("client_0");
@@ -82,16 +112,7 @@ public class Test {
         String text = "hello world";
         getSuccessMessage(client0.check_in(client0.generateUID("0.txt"), text, SecurityFlag.integrity));
 
-        /*System.out.println("Checking signature...");
-        String signature = ClientCrypto.toHexString(ClientCrypto.doSHA256(text.getBytes()));
-        System.out.println("Client signature: " + signature);
-        String dbSignature = Mongo.getSignatureByUID("0.txt");
-        System.out.println("Server signature: " + dbSignature);
-        if (!signature.equals(dbSignature)) {
-            System.out.println("failed!");
-            System.exit(1);
-        }
-        System.out.println("done!");*/
+        checkSignature(text, "0.txt");
 
         System.out.print("Client0: checking out 0.txt...");
         text = getSuccessMessage(client0.check_out(client0.generateUID("0.txt"))).getMessage();
@@ -126,6 +147,8 @@ public class Test {
 
         System.out.print("Client0: checking in 1.txt...");
         getSuccessMessage(client0.check_in(client0.generateUID("1.txt"), text, SecurityFlag.both));
+
+        checkSignature(text, "1.txt");
 
         System.out.print("Client0: checking out 1.txt...");
         text = getSuccessMessage(client0.check_out(client0.generateUID("1.txt"))).getMessage();

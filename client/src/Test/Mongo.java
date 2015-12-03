@@ -12,10 +12,18 @@ import static com.mongodb.client.model.Filters.*;
  */
 public class Mongo {
 
-    public static String getSignatureByUID(String uid) {
+    private static String getPropertyByUID(String uid, String property) {
         MongoClient client = new MongoClient(new MongoClientURI("mongodb://localhost:8889"));
         MongoDatabase db = client.getDatabase("s2dr");
         Document doc = db.getCollection("meta").find(eq("UID", uid)).first();
-        return (String) doc.get("signature");
+        return (String) doc.get(property);
+    }
+
+    public static String getSignatureByUID(String uid) {
+        return getPropertyByUID(uid, "signature");
+    }
+
+    public static String getKeyByUID(String uid) {
+        return getPropertyByUID(uid, "key");
     }
 }
