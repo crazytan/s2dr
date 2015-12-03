@@ -50,7 +50,7 @@ exports.init = function () {
 
 // return decrypted string in HEX
 exports.decryptMessage = function (m, key) {
-    var cipher = crypto.createDecipher(aesAlgorithm, key);
+    var cipher = crypto.createDecipher(aesAlgorithm, new Buffer(key, 'hex'));
     var decrypted = cipher.update(m.toString('hex'), 'hex', 'utf8');
     decrypted += cipher.final('utf8');
     return decrypted;

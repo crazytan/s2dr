@@ -130,7 +130,7 @@ public class SecureClient {
     public InsecureMessage check_in(UID document_id, String document, SecurityFlag flag) {
         return Channel.send(name, "checkin", "{\"uid\":\"" + document_id + "\"," +
                                              "\"document\":\"" + document + "\"," +
-                                             "\"flag\":" + flag + "}");
+                                             "\"flag\":" + flag.ordinal() + "}");
     }
 
     public InsecureMessage delegate(UID document_id, SecureClient c, int time,
@@ -138,7 +138,7 @@ public class SecureClient {
         return Channel.send(name, "delegate", "{\"uid\":\"" + document_id + "\"," +
                                               "\"client\":\"" + c.getName() + "\"," +
                                               "\"time\":" + time + "," +
-                                              "\"permission\":" + p + "," +
+                                              "\"permission\":" + p.ordinal() + "," +
                                               "\"flag\":" + (propagationFlag ? 1 : 0) + "}");
     }
 
