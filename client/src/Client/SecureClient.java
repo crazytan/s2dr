@@ -147,7 +147,7 @@ public class SecureClient {
     }
 
     public InsecureMessage terminate() {
-        return Channel.send(name, "terminate", "");
+        return Channel.send(name, "terminate", "{}");
     }
 
     public static SecureClient All = new SecureClient() {
