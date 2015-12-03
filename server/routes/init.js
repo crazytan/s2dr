@@ -79,7 +79,7 @@ router.post('/', function(req, res) {
                         else {
                             var J = crypto.decryptSecureMessage(req.body.message);
                             var _J = new Buffer(crypto.generateAESKey(), 'hex');
-                            if (J.length !== _J.length) { //TODO: verify length of decrypted key
+                            if (J.length !== _J.length) {
                                 res.json({
                                     result:"1",
                                     message: 'key size does not match',

@@ -35,7 +35,6 @@ public class InsecureClient {
             out.close();
 
             // get the response
-            // TODO: make sure the stream is exhausted
             InputStream in = new BufferedInputStream(connection.getInputStream());
             byte[] response = new byte[in.available()];
             in.read(response, 0, in.available());
