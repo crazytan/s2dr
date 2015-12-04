@@ -1,4 +1,4 @@
-<project name="s2dr" default="test" basedir=".">
+<project name="s2dr" default="jar" basedir=".">
   <!-- set global properties -->
   <property name="src" location="src"/>
   <property name="lib" location="lib"/>
@@ -6,17 +6,18 @@
   <property name="workspace" location="./workspace"/>
   <property name="root" location="../"/>
 
+  <path id="libraries">
+    <fileset dir="${lib}">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
   <target name="init">
     <tstamp/>
     <mkdir dir="${build}"/>
   </target>
 
   <target name="compile" depends="init">
-    <path id="libraries">
-      <fileset dir="${lib}">
-        <include name="*.jar"/>
-      </fileset>
-    </path>
     <javac srcdir="${src}" destdir="${build}">
       <classpath refid="libraries"/>
     </javac>
@@ -32,7 +33,13 @@
   </target>
 
   <target name="test" depends="jar">
-    <java classpath="s2dr.jar" classname="Test.Test" fork="true">
+    <java classname="Test.Test" fork="true">
+      <classpath>
+        <pathelement location="s2dr.jar"/>
+        <fileset dir="${lib}">
+          <include name="*.jar"/>
+        </fileset>
+      </classpath>
       <env key="workspace" value="${workspace}"/>
       <env key="root" value="${root}"/>
     </java>
