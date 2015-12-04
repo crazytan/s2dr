@@ -193,30 +193,30 @@ public class ClientCrypto {
     }
 
     public static String toHexString(byte[] text) {
-        int len = text.length;
-        String rst = "";
-        for (int i = 0; i < len; ++i) {
-            rst = rst + ClientCrypto.intToString((text[i] >> 4) & (byte)0x0f) + ClientCrypto.intToString(text[i] & (byte)0x0f);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < text.length; ++i) {
+            sb.append(ClientCrypto.digitToChar((text[i] >> 4) & (byte)0x0f));
+            sb.append(ClientCrypto.digitToChar(text[i] & (byte)0x0f));
         }
-        return rst;
+        return sb.toString();
     }
 
-    private static String intToString(int integer){
-        if (integer < 10)
-            return Integer.toString(integer);
+    private static Character digitToChar(int integer){
+        if (integer < 10) return (char) (integer + '0');
+            //return Integer.toString(integer);
         switch (integer){
             case 10:
-                return new String("A");
+                return 'a';
             case 11:
-                return new String("B");
+                return 'b';
             case 12:
-                return new String("C");
+                return 'c';
             case 13:
-                return new String("D");
+                return 'd';
             case 14:
-                return new String("E");
+                return 'e';
             case 15:
-                return new String("F");
+                return 'f';
         }
         return null;
     }
