@@ -63,6 +63,6 @@ public final class CA {
                 tmpKey.delete();
             }
         }
-        return null;
+        return "";
     }
 }

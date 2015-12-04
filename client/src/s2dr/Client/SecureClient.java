@@ -24,8 +24,6 @@ public class SecureClient {
 
     private PrivateKey privateKey;
 
-    private String certificate;
-
     public enum Permission {
         checkin, checkout, both, owner
     }
@@ -71,12 +69,12 @@ public class SecureClient {
 
                     path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/certificate");
                     byte[] certificateByte = Files.readAllBytes(path);
-                    certificate = new String(certificateByte);
+                    String certificate = new String(certificateByte);
                 }
                 catch (Exception e) {
                     e.printStackTrace();
                 }
-            }else {
+            } else {
                 File dir = new File(System.getenv("workspace") + "/" + name);
                 dir.mkdir();
 
@@ -89,20 +87,20 @@ public class SecureClient {
                 publicKey = keyPair.getPublic();
                 privateKey = keyPair.getPrivate();
 
-                certificate = CA.createCertificate(name, ClientCrypto.privateKeyToString(privateKey));
+                String certificate = CA.createCertificate(name, ClientCrypto.privateKeyToString(privateKey));
 
                 //save to disk
                 try {
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/key.master");
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/" + name + ".master");
                     Files.write(path, ClientCrypto.aesKeyToString(masterKey).getBytes());
 
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/key.public");
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/" + name + ".pub");
                     Files.write(path, ClientCrypto.publicKeyToString(publicKey).getBytes());
 
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/key.private");
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/" + name + ".key");
                     Files.write(path, ClientCrypto.privateKeyToString(privateKey).getBytes());
 
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/certificate");
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/" + name + ".crt");
                     Files.write(path, certificate.getBytes());
                 }
                 catch (Exception e) {
@@ -206,11 +204,8 @@ public class SecureClient {
         }
         catch (Exception e){
             e.printStackTrace();
-            return "";
         }
-        finally {
-            return "";
-        }
+        return "";
     }
 
     private void saveToFile(String fileName, String data) {
@@ -220,8 +215,6 @@ public class SecureClient {
         }
         catch (Exception e) {
             e.printStackTrace();
-        }
-        finally {
         }
     }
 
