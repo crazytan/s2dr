@@ -55,19 +55,19 @@ public class SecureClient {
             Path path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name);
             if (Files.exists(path)) {
                 try {
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/key.master");
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/" + name + ".master");
                     byte[] masterkeyByte = Files.readAllBytes(path);
                     masterKey = ClientCrypto.stringToAESKey(new String(masterkeyByte));
 
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/key.public");
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/" + name + ".pub");
                     byte[] publickeyByte = Files.readAllBytes(path);
                     publicKey = ClientCrypto.stringToPublicKey(new String(publickeyByte));
 
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/key.private");
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/" + name + ".key");
                     byte[] privatekeyByte = Files.readAllBytes(path);
                     privateKey = ClientCrypto.stringToPrivateKey(new String(privatekeyByte));
 
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/certificate");
+                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/" + name + ".crt");
                     byte[] certificateByte = Files.readAllBytes(path);
                     String certificate = new String(certificateByte);
                 }
@@ -160,15 +160,26 @@ public class SecureClient {
     }
 
     private static void printHelp() {
-        System.out.println("Operations: init, checkout, checkin, delegate, delete, terminate");
+        System.out.println("Operations:        init, checkout, checkin, delegate, delete, terminate\n" +
+                "-init:             init\n" +
+                "-checkout:         checkout srcfile dstfile\n" +
+                "-checkin:          checkin dstfile srcfile flags\n" +
+                "-delegate:         delegate file client duration permissionFlags propagationFlags\n" +
+                "-delete:           delete file\n" +
+                "-terminate:        terminate\n" +
+                "-exit:             exit\n\n" +
+                "-checkinflags:     0/1/2/3 ==> none/confidentiality/integrity/both\n" +
+                "-permissionflags:  0/1/2/3 ==> checkin/checkout/both/owner\n" +
+                "-propagationflags: true/false");
+
     }
 
     public UID generateUID(String uid) {
         return new UID(uid);
     }
 
-    private static SecurityFlag generateFlag(String flag) {
-        int _flag = Integer.parseInt(flag);
+    private static SecurityFlag generateFlag(int flag) {
+        int _flag = flag;//Integer.parseInt(flag);
         if (_flag == 0) {
             return SecurityFlag.none;
         }
@@ -181,8 +192,8 @@ public class SecureClient {
         return SecurityFlag.both;
     }
 
-    private static Permission generatePermission(String p) {
-        int _p = Integer.parseInt(p);
+    private static Permission generatePermission(int p) {
+        int _p = p;//Integer.parseInt(p);
         if (_p == 0) {
             return Permission.checkin;
         }
@@ -203,7 +214,7 @@ public class SecureClient {
             return data;
         }
         catch (Exception e){
-            e.printStackTrace();
+            System.out.println("file " + fileName + " not found! Check-in empty content.");
         }
         return "";
     }
@@ -242,29 +253,61 @@ public class SecureClient {
                 message = client.init_session("server");
             }
             if (commands[0].equals("checkout")) {
+                if (commands.length < 2) {
+                    System.out.println("command not valid! See 'help'");
+                    continue;
+                }
                 message = client.check_out(client.generateUID(commands[1]));
                 if (message.isSuccess()) {
-                    client.saveToFile(commands[1], message.getMessage());
+                    client.saveToFile(commands[2], message.getMessage());
                 }
             }
             if (commands[0].equals("checkin")) {
+                if (commands.length < 3) {
+                    System.out.println("command not valid! See 'help'");
+                    continue;
+                }
+                int flag = 3;
+                try {
+                    flag = Integer.parseInt(commands[3]);
+                }catch (NumberFormatException e) {
+                    System.out.println("command not valid! See 'help'");
+                }
                 String data = client.readFromFile(commands[2]);
-                message = client.check_in(client.generateUID(commands[1]), data, SecureClient.generateFlag(commands[3]));
+                message = client.check_in(client.generateUID(commands[1]), data, SecureClient.generateFlag(flag));
             }
             if (commands[0].equals("delegate")) {
+                if (commands.length < 4) {
+                    System.out.println("command not valid! See 'help'");
+                    continue;
+                }
+                int time = 0;
+                int permissionFlag = -1;
+                try {
+                    time = Integer.parseInt(commands[3]);
+                    permissionFlag = Integer.parseInt(commands[4]);
+                }
+                catch (NumberFormatException e) {
+                    System.out.println("command not valid! See 'help'");
+                    continue;
+                }
                 message = client.delegate(client.generateUID(commands[1]),
                         commands[2].equals("all") ? SecureClient.All : new SecureClient(commands[2]),
-                        Integer.parseInt(commands[3]),
-                        SecureClient.generatePermission(commands[4]),
+                        time,
+                        SecureClient.generatePermission(permissionFlag),
                         commands[5].equals("true"));
             }
             if (commands[0].equals("delete")) {
+                if (commands.length < 2) {
+                    System.out.println("command not valid! See 'help'");
+                }
                 message = client.safe_delete(client.generateUID(commands[1]));
             }
             if (commands[0].equals("terminate")) {
                 message = client.terminate();
             }
             if (message == null) {
+                System.out.println("command not valid! See 'help'");
                 continue;
             }
             if (message.isSuccess()) {
