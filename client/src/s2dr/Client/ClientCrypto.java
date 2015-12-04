@@ -1,4 +1,4 @@
-package Client;
+package s2dr.Client;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;

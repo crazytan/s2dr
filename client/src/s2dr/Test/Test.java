@@ -1,10 +1,10 @@
-package Test;
+package s2dr.Test;
 
-import Client.ClientCrypto;
-import Client.InsecureMessage;
-import Client.SecureClient;
-import Client.SecureClient.SecurityFlag;
-import Client.SecureClient.Permission;
+import s2dr.Client.ClientCrypto;
+import s2dr.Client.InsecureMessage;
+import s2dr.Client.SecureClient;
+import s2dr.Client.SecureClient.SecurityFlag;
+import s2dr.Client.SecureClient.Permission;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;

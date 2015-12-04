@@ -1,4 +1,4 @@
-package Test;
+package s2dr.Test;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;

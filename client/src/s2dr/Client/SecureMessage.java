@@ -1,4 +1,4 @@
-package Client;
+package s2dr.Client;
 
 import com.google.gson.Gson;
 

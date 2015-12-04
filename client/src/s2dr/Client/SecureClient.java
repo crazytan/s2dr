@@ -1,6 +1,6 @@
-package Client;
+package s2dr.Client;
 
-import CA.CA;
+import s2dr.CA.CA;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;

@@ -1,4 +1,4 @@
-package CA;
+package s2dr.CA;
 
 import java.io.*;
 import java.util.ArrayList;

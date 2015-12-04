@@ -1,17 +1,15 @@
-package Client;
+package s2dr.Client;
 
-import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.*;
 import java.util.*;
 
-import CA.CA;
-import Client.SecureClient.UID;
+import s2dr.CA.CA;
+import s2dr.Client.SecureClient.UID;
 import com.google.gson.Gson;
 
 /**

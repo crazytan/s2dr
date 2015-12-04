@@ -1,4 +1,4 @@
-package Client;
+package s2dr.Client;
 
 import java.io.*;
 import java.net.HttpURLConnection;
