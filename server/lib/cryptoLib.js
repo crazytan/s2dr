@@ -48,7 +48,6 @@ exports.init = function () {
     ifInit = true;
 };
 
-// return decrypted string in HEX
 exports.decryptMessage = function (m, key) {
     var cipher = crypto.createDecipheriv(aesAlgorithm, new Buffer(key, 'hex'), '');
     var decrypted = cipher.update(new Buffer(m, 'hex'), '', 'utf8');
@@ -56,7 +55,6 @@ exports.decryptMessage = function (m, key) {
     return decrypted;
 };
 
-// return encrypted string in HEX
 exports.encryptMessage = function (m, key) {
     var cipher = crypto.createCipheriv(aesAlgorithm, new Buffer(key, 'hex'), '');
     var encrypted = cipher.update(new Buffer(m), '', 'hex');
@@ -65,25 +63,25 @@ exports.encryptMessage = function (m, key) {
 };
 
 exports.decryptSignature = function (m, key) {
-    var cipher = crypto.createDecipher(aesAlgorithm, key);
-    var decrypted = cipher.update(m.toString('hex'), 'hex', 'hex');
+    var cipher = crypto.createDecipheriv(aesAlgorithm, new Buffer(key, 'hex'), '');
+    var decrypted = cipher.update(new Buffer(m, 'hex'), '', 'hex');
     decrypted += cipher.final('hex');
     return decrypted;
 };
 
 exports.encryptSignature = function (m, key) {
-    var cipher = crypto.createCipher(aesAlgorithm, key);
+    var cipher = crypto.createCipheriv(aesAlgorithm, new Buffer(key, 'hex'), '');
     var encrypted = cipher.update(m, 'hex', 'hex');
     encrypted += cipher.final('hex');
     return encrypted;
 };
 
 exports.decryptKey = function (encryptedKey) {
-    return CAPrivate.decrypt(encryptedKey, 'hex');
+    return myPrivate.decrypt(encryptedKey, 'hex');
 };
 
 exports.encryptKey = function (key) {
-    return CAPublic.encrypt(key, 'base64', 'hex');
+    return myPrivate.encrypt(key, 'base64', 'hex');
 };
 
 exports.hash = function (m) {

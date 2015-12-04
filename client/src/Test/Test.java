@@ -13,6 +13,9 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.PrivateKey;
+import java.util.Base64;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Test script
@@ -75,13 +78,14 @@ public class Test {
         Path path = FileSystems.getDefault().getPath(root + "/server/server.key");
         byte[] keyBytes = Files.readAllBytes(path);
         PrivateKey serverKey = ClientCrypto.stringToPrivateKey(new String(keyBytes));
-        byte[] decryptedKey = ClientCrypto.RSADecrypt(encryptedKey.getBytes(), serverKey);
+
+        byte[] decryptedKey = ClientCrypto.RSADecrypt(Base64.getDecoder().decode(encryptedKey.getBytes()), serverKey);
         SecretKey key = new SecretKeySpec(decryptedKey, "AES");
-        byte[] decryptedSignature = ClientCrypto.AESDecrypt(dbSignature.getBytes(), key);
+        byte[] decryptedSignature = ClientCrypto.AESDecrypt(ClientCrypto.toByte(dbSignature), key);
 
-        System.out.println("Server signature: " + new String(decryptedSignature));
+        System.out.println("Server signature: " + ClientCrypto.toHexString(decryptedSignature));
 
-        if (!mySignature.equals(new String(decryptedSignature))) {
+        if (!mySignature.equals(ClientCrypto.toHexString(decryptedSignature))) {
             System.out.println("failed!");
             System.exit(1);
         }
@@ -89,6 +93,10 @@ public class Test {
     }
 
     private static void initialize() {
+        // disable mongodb logging
+        Logger mongoLogger = Logger.getLogger("org.mongodb.driver");
+        mongoLogger.setLevel(Level.OFF);
+
         System.out.print("Creating client_0...");
         client0 = new SecureClient("client_0");
         System.out.println("done!");

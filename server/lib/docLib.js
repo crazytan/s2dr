@@ -39,7 +39,7 @@ filterExpired = function (acl) {
     return _acl;
 };
 
-filterDuplicated = function (acl) {
+filterDuplicate = function (acl) {
     var timestamp = acl[0].timestamp;
     var index = 0;
     for (var i = 0;i < acl.length;i++) {
@@ -95,9 +95,12 @@ exports.checkDelegate = function (name, message, acl, callback) {
             //callback(null, _acl[i]);
         }
     }
-    var _acl_d = filterDuplicated(_acls);
-    callback(null, _acl_d);
-    if (!found) callback(new Error(), null);
+    if (found) {
+        callback(null, filterDuplicate(_acls));
+    }
+    else {
+        callback(new Error(), null);
+    }
 };
 
 exports.getDoc = function (meta, callback) {
@@ -118,7 +121,7 @@ exports.getDoc = function (meta, callback) {
         });
     }
     else if (meta.flag == this.secFlag.integrity) {
-        var decryptedSignature = crypto.decryptMessage(meta.signature, key);
+        var decryptedSignature = crypto.decryptSignature(meta.signature, key);
         fs.readFile(path, function (err, data) {
             if (err) callback(err, null);
             else {
@@ -129,7 +132,7 @@ exports.getDoc = function (meta, callback) {
         });
     }
     else {
-        var decryptedSignature = crypto.decryptMessage(meta.signature, key);
+        var decryptedSignature = crypto.decryptSignature(meta.signature, key);
         fs.readFile(path, {encoding:'hex'}, function (err, data) {
             if (err) callback(err, null);
             else {
@@ -171,7 +174,7 @@ exports.addDoc = function (channel, message, callback) {
     else if (message.flag == this.secFlag.integrity) {
         var key = crypto.generateAESKey();
         var signature = crypto.hash(message.document);
-        var encryptedSignature = crypto.encryptMessage(signature, key);
+        var encryptedSignature = crypto.encryptSignature(signature, key);
         var encryptedKey = crypto.encryptKey(key);
         meta.signature = encryptedSignature;
         meta.key = encryptedKey;
@@ -201,7 +204,7 @@ exports.addDoc = function (channel, message, callback) {
     else {
         var key = crypto.generateAESKey();
         var signature = crypto.hash(message.document);
-        var encryptedSignature = crypto.encryptMessage(signature, key);
+        var encryptedSignature = crypto.encryptSignature(signature, key);
         var encryptedKey = crypto.encryptKey(key);
         var cipherText = crypto.encryptMessage(message.document, key);
         meta.key = encryptedKey;
@@ -237,7 +240,7 @@ exports.updateDoc = function (channel, message, meta, callback) {
     else if (message.flag == this.secFlag.integrity) {
         var key = crypto.generateAESKey();
         var signature = crypto.hash(message.document);
-        var encryptedSignature = crypto.encryptMessage(signature, key);
+        var encryptedSignature = crypto.encryptSignature(signature, key);
         var encryptedKey = crypto.encryptKey(key);
         meta.signature = encryptedSignature;
         meta.key = encryptedKey;
@@ -267,7 +270,7 @@ exports.updateDoc = function (channel, message, meta, callback) {
     else {
         var key = crypto.generateAESKey();
         var signature = crypto.hash(message.document);
-        var encryptedSignature = crypto.encryptMessage(signature, key);
+        var encryptedSignature = crypto.encryptSignature(signature, key);
         var encryptedKey = crypto.encryptKey(key);
         var cipherText = crypto.encryptMessage(message.document, key);
         meta.key = encryptedKey;
