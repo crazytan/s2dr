@@ -76,9 +76,7 @@ exports.encryptKey = function (key) {
 };
 
 exports.hash = function (m) {
-    var shasum = crypto.createHash(hashAlgorithm);
-    shasum.update(m.toString('binary'), 'binary');
-    return shasum.digest('hex');
+    return crypto.createHash(hashAlgorithm).update(new Buffer(m)).digest('hex');
 };
 
 exports.hashBuffer = function (buf) {
