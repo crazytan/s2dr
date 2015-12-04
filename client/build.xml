@@ -12,6 +12,16 @@
     </fileset>
   </path>
 
+  <pathconvert property="classpath" pathsep=" ">
+    <path refid="libraries"/>
+    <mapper>
+      <chainedmapper>
+        <flattenmapper/>
+        <globmapper from="*.jar" to="lib/*.jar"/>
+      </chainedmapper>
+    </mapper>
+  </pathconvert>
+
   <target name="init">
     <tstamp/>
     <mkdir dir="${build}"/>
@@ -25,8 +35,10 @@
 
   <target name="jar" depends="compile">
     <jar basedir="${build}" destfile="s2dr-client.jar">
+      <zipgroupfileset dir="${lib}" includes="*.jar"/>
       <manifest>
         <attribute name="Main-Class" value="s2dr.client.SecureClient"/>
+        <attribute name="Class-Path" value="${classpath}"/>
       </manifest>
     </jar>
     <delete dir="${build}"/>
@@ -36,9 +48,6 @@
     <java classname="s2dr.test.Test" fork="true">
       <classpath>
         <pathelement location="s2dr-client.jar"/>
-        <fileset dir="${lib}">
-          <include name="*.jar"/>
-        </fileset>
       </classpath>
       <env key="workspace" value="${workspace}"/>
       <env key="root" value="${root}"/>

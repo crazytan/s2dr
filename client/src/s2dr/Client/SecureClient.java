@@ -249,6 +249,7 @@ public class SecureClient {
                 continue;
             }
             if (commands[0].equals("exit")) {
+                client.terminate();
                 break;
             }
             if (commands[0].equals("init")) {
