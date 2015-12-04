@@ -1,7 +1,5 @@
 package Client;
 
-import sun.jvm.hotspot.debugger.bsd.amd64.BsdAMD64CFrame;
-
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -114,7 +112,7 @@ public class ClientCrypto {
         return null;
     }
 
-    private static String devideToLines(String string) {
+    private static String divideToLines(String string) {
         String multiLinesStr = "";
         while (string.length() > 64) {
             multiLinesStr = multiLinesStr + string.substring(0, 64) + "\n";
@@ -127,19 +125,19 @@ public class ClientCrypto {
     public static String publicKeyToString(PublicKey key) {
         byte[] keyByte = Base64.getEncoder().encode(key.getEncoded());
         String keyStr = new String(keyByte);
-        return "-----BEGIN PUBLIC KEY-----\n" + devideToLines(keyStr) + "-----END PUBLIC KEY-----\n";
+        return "-----BEGIN PUBLIC KEY-----\n" + divideToLines(keyStr) + "-----END PUBLIC KEY-----\n";
     }
 
     public static String privateKeyToString(PrivateKey key) {
         byte[] keyByte = Base64.getEncoder().encode(key.getEncoded());
         String keyStr = new String(keyByte);
-        return "-----BEGIN PRIVATE KEY-----\n" + devideToLines(keyStr) + "-----END PRIVATE KEY-----\n";
+        return "-----BEGIN PRIVATE KEY-----\n" + divideToLines(keyStr) + "-----END PRIVATE KEY-----\n";
     }
 
     public static String aesKeyToString(SecretKey key) {
         byte[] keyByte = Base64.getEncoder().encode(key.getEncoded());
         String keyStr = new String(keyByte);
-        return "-----BEGIN AES KEY-----\n" + devideToLines(keyStr) + "-----END AES KEY-----";
+        return "-----BEGIN AES KEY-----\n" + divideToLines(keyStr) + "-----END AES KEY-----";
     }
 
     public static PublicKey stringToPublicKey(String string) {
