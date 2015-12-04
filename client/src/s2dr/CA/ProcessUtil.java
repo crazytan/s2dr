@@ -10,7 +10,7 @@ import java.util.List;
  */
 public final class ProcessUtil {
 
-    private static final File root = new File(System.getenv("root"));
+    private static final File root = new File("../");
 
     private ProcessUtil() {}
 

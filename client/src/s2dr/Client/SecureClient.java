@@ -15,6 +15,8 @@ import java.security.*;
  */
 public class SecureClient {
 
+    private static final File workspace = new File("./workspace");
+
     private UID name;
 
     // 128-bit master key for generating key identifier
@@ -52,22 +54,22 @@ public class SecureClient {
 
         // generate master key
         try {
-            Path path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name);
+            Path path = FileSystems.getDefault().getPath(workspace.getAbsolutePath() + "/" + name);
             if (Files.exists(path)) {
                 try {
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/" + name + ".master");
+                    path = FileSystems.getDefault().getPath(workspace.getAbsolutePath() + "/" + name + "/" + name + ".master");
                     byte[] masterkeyByte = Files.readAllBytes(path);
                     masterKey = ClientCrypto.stringToAESKey(new String(masterkeyByte));
 
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/" + name + ".pub");
+                    path = FileSystems.getDefault().getPath(workspace.getAbsolutePath() + "/" + name + "/" + name + ".pub");
                     byte[] publickeyByte = Files.readAllBytes(path);
                     publicKey = ClientCrypto.stringToPublicKey(new String(publickeyByte));
 
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/" + name + ".key");
+                    path = FileSystems.getDefault().getPath(workspace.getAbsolutePath() + "/" + name + "/" + name + ".key");
                     byte[] privatekeyByte = Files.readAllBytes(path);
                     privateKey = ClientCrypto.stringToPrivateKey(new String(privatekeyByte));
 
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/" + name + ".crt");
+                    path = FileSystems.getDefault().getPath(workspace.getAbsolutePath() + "/" + name + "/" + name + ".crt");
                     byte[] certificateByte = Files.readAllBytes(path);
                     String certificate = new String(certificateByte);
                 }
@@ -75,7 +77,7 @@ public class SecureClient {
                     e.printStackTrace();
                 }
             } else {
-                File dir = new File(System.getenv("workspace") + "/" + name);
+                File dir = new File(workspace.getAbsolutePath() + "/" + name);
                 dir.mkdir();
 
                 KeyGenerator gen = KeyGenerator.getInstance("AES");
@@ -91,16 +93,16 @@ public class SecureClient {
 
                 //save to disk
                 try {
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/" + name + ".master");
+                    path = FileSystems.getDefault().getPath(workspace.getAbsolutePath() + "/" + name + "/" + name + ".master");
                     Files.write(path, ClientCrypto.aesKeyToString(masterKey).getBytes());
 
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/" + name + ".pub");
+                    path = FileSystems.getDefault().getPath(workspace.getAbsolutePath() + "/" + name + "/" + name + ".pub");
                     Files.write(path, ClientCrypto.publicKeyToString(publicKey).getBytes());
 
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/" + name + ".key");
+                    path = FileSystems.getDefault().getPath(workspace.getAbsolutePath() + "/" + name + "/" + name + ".key");
                     Files.write(path, ClientCrypto.privateKeyToString(privateKey).getBytes());
 
-                    path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + name + "/" + name + ".crt");
+                    path = FileSystems.getDefault().getPath(workspace.getAbsolutePath() + "/" + name + "/" + name + ".crt");
                     Files.write(path, certificate.getBytes());
                 }
                 catch (Exception e) {

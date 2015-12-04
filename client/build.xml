@@ -24,9 +24,9 @@
   </target>
 
   <target name="jar" depends="compile">
-    <jar basedir="${build}" destfile="s2dr.jar">
+    <jar basedir="${build}" destfile="s2dr-client.jar">
       <manifest>
-        <attribute name="Main-Class" value="s2dr.test.Test"/>
+        <attribute name="Main-Class" value="s2dr.client.SecureClient"/>
       </manifest>
     </jar>
     <delete dir="${build}"/>
@@ -35,7 +35,7 @@
   <target name="test" depends="jar">
     <java classname="s2dr.test.Test" fork="true">
       <classpath>
-        <pathelement location="s2dr.jar"/>
+        <pathelement location="s2dr-client.jar"/>
         <fileset dir="${lib}">
           <include name="*.jar"/>
         </fileset>
