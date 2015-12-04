@@ -79,12 +79,6 @@ exports.hash = function (m) {
     return crypto.createHash(hashAlgorithm).update(new Buffer(m)).digest('hex');
 };
 
-exports.hashBuffer = function (buf) {
-    var shasum = crypto.createHash(hashAlgorithm);
-    shasum.update(buf);
-    return shasum.digest('hex');
-};
-
 exports.generateAESKey = function () {
     var key = crypto.randomBytes(AESKeyLen / 8);
     return key.toString('hex');
