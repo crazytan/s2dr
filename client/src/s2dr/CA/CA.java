@@ -11,16 +11,16 @@ public final class CA {
 
     private CA() {}
 
-    public static String extractPublicKeyFromCertificate(String certificate) {
+    public static String extractPropertyFromCertificate(String certificate, String property) {
         try {
-            Process ps = ProcessUtil.createOpenSSLProcess("x509", "-pubkey", "-noout");
+            Process ps = ProcessUtil.createOpenSSLProcess("x509", "-" + property, "-noout");
             ProcessUtil.writeStandardInput(certificate, ps);
             return ProcessUtil.getStandardOutput(ps);
         }
         catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+        return "";
     }
 
     public static boolean validateCertificate(String certificate) {
@@ -29,7 +29,10 @@ public final class CA {
             ProcessUtil.writeStandardInput(certificate, ps);
             String result = ProcessUtil.getStandardOutput(ps);
             if (result.contains("OK")) {
-                return true;
+                String subject = extractPropertyFromCertificate(certificate, "subject");
+                if (subject.contains("server")) {
+                    return true;
+                }
             }
         }
         catch (IOException e) {

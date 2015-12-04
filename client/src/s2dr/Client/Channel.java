@@ -52,7 +52,7 @@ public final class Channel {
             return null;
         }
         try {
-            String publicKeyStr = CA.extractPublicKeyFromCertificate(certificate);
+            String publicKeyStr = CA.extractPropertyFromCertificate(certificate, "pubkey");
             return ClientCrypto.stringToPublicKey(publicKeyStr);
         }
         catch (Exception e) {

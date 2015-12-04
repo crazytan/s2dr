@@ -1,7 +1,6 @@
 package s2dr.client;
 
 import s2dr.ca.CA;
-import sun.plugin2.gluegen.runtime.BufferFactory;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
