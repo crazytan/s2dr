@@ -20,7 +20,7 @@ var decrypt = express.Router().post('/', function(req, res, next) {
             });
         }
         else {
-            var plainText = crypto.decryptMessage(req.body.message, channel.key);
+            var plainText = crypto.AESDecrypt(req.body.message, channel.key, 'utf8');
             req.s2dr = {};
             req.s2dr.message = JSON.parse(plainText);
             req.s2dr.channel = channel;
@@ -32,7 +32,7 @@ var decrypt = express.Router().post('/', function(req, res, next) {
 // middleware for encrypting outgoing messages
 var encrypt = express.Router().post('/', function(req, res) {
     var plainText = JSON.stringify(req.s2dr.response);
-    var cipherText = crypto.encryptMessage(plainText, req.s2dr.channel.key);
+    var cipherText = crypto.AESEncrypt(plainText, req.s2dr.channel.key);
     res.json({
         result:"0",
         identifier: req.s2dr.channel.myID,

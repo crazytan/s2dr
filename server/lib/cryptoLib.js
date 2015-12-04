@@ -13,8 +13,8 @@ var crypto = require('crypto'),
     myCert = '', // server's certificate
     CACert = ''; // CA's certificate
 
-var aesKeyLen = 128,  // # of bits of AES key
-    aesAlgorithm = 'aes-128-ecb',
+var AESKeyLen = 128,  // # of bits of AES key
+    AESAlgorithm = 'aes-128-ecb',
     hashAlgorithm = 'sha256',
     CAPublicPath = '../CA.pub', // path of CA's public key
     CAPrivatePath = '../CA.key', // path of CA's private key
@@ -48,32 +48,23 @@ exports.init = function () {
     ifInit = true;
 };
 
-exports.decryptMessage = function (m, key) {
-    var cipher = crypto.createDecipheriv(aesAlgorithm, new Buffer(key, 'hex'), '');
-    var decrypted = cipher.update(new Buffer(m, 'hex'), '', 'utf8');
-    decrypted += cipher.final('utf8');
-    return decrypted;
-};
-
-exports.encryptMessage = function (m, key) {
-    var cipher = crypto.createCipheriv(aesAlgorithm, new Buffer(key, 'hex'), '');
-    var encrypted = cipher.update(new Buffer(m), '', 'hex');
+exports.AESEncrypt = function (m, key, encoding) {
+    var cipher = crypto.createCipheriv(AESAlgorithm, new Buffer(key, 'hex'), '');
+    if (encoding) {
+        var encrypted = cipher.update(new Buffer(m, encoding), '', 'hex');
+    }
+    else {
+        encrypted = cipher.update(new Buffer(m), '', 'hex');
+    }
     encrypted += cipher.final('hex');
     return encrypted;
 };
 
-exports.decryptSignature = function (m, key) {
-    var cipher = crypto.createDecipheriv(aesAlgorithm, new Buffer(key, 'hex'), '');
-    var decrypted = cipher.update(new Buffer(m, 'hex'), '', 'hex');
-    decrypted += cipher.final('hex');
+exports.AESDecrypt = function (m, key, encoding) {
+    var cipher = crypto.createDecipheriv(AESAlgorithm, new Buffer(key, 'hex'), '');
+    var decrypted = cipher.update(new Buffer(m, 'hex'), '', encoding);
+    decrypted += cipher.final(encoding);
     return decrypted;
-};
-
-exports.encryptSignature = function (m, key) {
-    var cipher = crypto.createCipheriv(aesAlgorithm, new Buffer(key, 'hex'), '');
-    var encrypted = cipher.update(m, 'hex', 'hex');
-    encrypted += cipher.final('hex');
-    return encrypted;
 };
 
 exports.decryptKey = function (encryptedKey) {
@@ -97,7 +88,7 @@ exports.hashBuffer = function (buf) {
 };
 
 exports.generateAESKey = function () {
-    var key = crypto.randomBytes(aesKeyLen / 8);
+    var key = crypto.randomBytes(AESKeyLen / 8);
     return key.toString('hex');
 };
 
@@ -148,7 +139,7 @@ exports.checkSignature = function (m, signature, certificate, callback) {
 };
 
 exports.encryptHex = function (m) {
-    var cipher = crypto.createCipher(aesAlgorithm, masterKey);
+    var cipher = crypto.createCipher(AESAlgorithm, masterKey);
     var encrypted = cipher.update(m, 'hex', 'hex');
     encrypted += cipher.final('hex');
     return encrypted;

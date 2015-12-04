@@ -92,7 +92,6 @@ exports.checkDelegate = function (name, message, acl, callback) {
         if (((_acl[i].name === name) || (_acl[i].name === 'all')) && contains(_acl[i].permission, message.permission) && _acl[i].propagation) {
             found = true;
             _acls.push(_acl[i]);
-            //callback(null, _acl[i]);
         }
     }
     if (found) {
@@ -116,12 +115,12 @@ exports.getDoc = function (meta, callback) {
         fs.readFile(path, {encoding:'hex'}, function (err, data) {
             if (err) callback(err, null);
             else {
-                callback(null, crypto.decryptMessage(data, key));
+                callback(null, crypto.AESDecrypt(data, key, 'utf8'));
             }
         });
     }
     else if (meta.flag == this.secFlag.integrity) {
-        var decryptedSignature = crypto.decryptSignature(meta.signature, key);
+        var decryptedSignature = crypto.AESDecrypt(meta.signature, key, 'hex');
         fs.readFile(path, function (err, data) {
             if (err) callback(err, null);
             else {
@@ -132,11 +131,11 @@ exports.getDoc = function (meta, callback) {
         });
     }
     else {
-        var decryptedSignature = crypto.decryptSignature(meta.signature, key);
+        decryptedSignature = crypto.AESDecrypt(meta.signature, key, 'hex');
         fs.readFile(path, {encoding:'hex'}, function (err, data) {
             if (err) callback(err, null);
             else {
-                var plainText = crypto.decryptMessage(data, key);
+                var plainText = crypto.AESDecrypt(data, key, 'utf8');
                 var signature = crypto.hash(plainText);
                 if (signature !== decryptedSignature) callback(new Error(), null);
                 else callback(null, plainText);
@@ -174,7 +173,7 @@ exports.addDoc = function (channel, message, callback) {
     else if (message.flag == this.secFlag.integrity) {
         var key = crypto.generateAESKey();
         var signature = crypto.hash(message.document);
-        var encryptedSignature = crypto.encryptSignature(signature, key);
+        var encryptedSignature = crypto.AESEncrypt(signature, key, 'hex');
         var encryptedKey = crypto.encryptKey(key);
         meta.signature = encryptedSignature;
         meta.key = encryptedKey;
@@ -188,9 +187,9 @@ exports.addDoc = function (channel, message, callback) {
         });
     }
     else if (message.flag == this.secFlag.confidentiality) {
-        var key = crypto.generateAESKey();
-        var encryptedKey = crypto.encryptKey(key);
-        var cipherText = crypto.encryptMessage(message.document, key);
+        key = crypto.generateAESKey();
+        encryptedKey = crypto.encryptKey(key);
+        cipherText = crypto.AESEncrypt(message.document, key);
         meta.key = encryptedKey;
         db.insertMeta(meta, function (err) {
             if (err) callback(err);
@@ -202,11 +201,11 @@ exports.addDoc = function (channel, message, callback) {
         });
     }
     else {
-        var key = crypto.generateAESKey();
-        var signature = crypto.hash(message.document);
-        var encryptedSignature = crypto.encryptSignature(signature, key);
-        var encryptedKey = crypto.encryptKey(key);
-        var cipherText = crypto.encryptMessage(message.document, key);
+        key = crypto.generateAESKey();
+        signature = crypto.hash(message.document);
+        encryptedSignature = crypto.AESEncrypt(signature, key, 'hex');
+        encryptedKey = crypto.encryptKey(key);
+        var cipherText = crypto.AESEncrypt(message.document, key);
         meta.key = encryptedKey;
         meta.signature = encryptedSignature;
         db.insertMeta(meta, function (err) {
@@ -240,7 +239,7 @@ exports.updateDoc = function (channel, message, meta, callback) {
     else if (message.flag == this.secFlag.integrity) {
         var key = crypto.generateAESKey();
         var signature = crypto.hash(message.document);
-        var encryptedSignature = crypto.encryptSignature(signature, key);
+        var encryptedSignature = crypto.AESEncrypt(signature, key, 'hex');
         var encryptedKey = crypto.encryptKey(key);
         meta.signature = encryptedSignature;
         meta.key = encryptedKey;
@@ -254,9 +253,9 @@ exports.updateDoc = function (channel, message, meta, callback) {
         });
     }
     else if (message.flag == this.secFlag.confidentiality) {
-        var key = crypto.generateAESKey();
-        var encryptedKey = crypto.encryptKey(key);
-        var cipherText = crypto.encryptMessage(message.document, key);
+        key = crypto.generateAESKey();
+        encryptedKey = crypto.encryptKey(key);
+        cipherText = crypto.AESEncrypt(message.document, key);
         meta.key = encryptedKey;
         db.updateMeta(meta, function (err) {
             if (err) callback(err);
@@ -268,11 +267,11 @@ exports.updateDoc = function (channel, message, meta, callback) {
         });
     }
     else {
-        var key = crypto.generateAESKey();
-        var signature = crypto.hash(message.document);
-        var encryptedSignature = crypto.encryptSignature(signature, key);
-        var encryptedKey = crypto.encryptKey(key);
-        var cipherText = crypto.encryptMessage(message.document, key);
+        key = crypto.generateAESKey();
+        signature = crypto.hash(message.document);
+        encryptedSignature = crypto.AESEncrypt(signature, key, 'hex');
+        encryptedKey = crypto.encryptKey(key);
+        var cipherText = crypto.AESEncrypt(message.document, key);
         meta.key = encryptedKey;
         meta.signature = encryptedSignature;
         db.updateMeta(meta, function (err) {
