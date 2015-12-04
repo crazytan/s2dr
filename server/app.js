@@ -59,11 +59,12 @@ app.use('/test', express.Router().post('/', function (req, res) {
 
 // catch 404 and return error message
 app.use(function(req, res, next) {
-    res.json({
-        result:"1",
-        identifier: null,
-        message: 'url or method error!'
-    });
+    res.status(404).send("url or method error");
+});
+
+// catch error thrown by middleware
+app.use(function (err, req, res, next) {
+    res.status(500).send("something broke");
 });
 
 var server = app.listen(8888, function() {
