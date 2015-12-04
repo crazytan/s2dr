@@ -40,21 +40,33 @@ router.post('/', function(req, res) {
         checkCertificate(certificate, res, function () {
             crypto.extractPublicKey(certificate, function (key) {
                 crypto.extractSubject(certificate, function (subject) {
-                    db.insertChannel(subject, key, function (err) {
+                    db.getChannelByPublicKey(key, function (err, channel) {
                         if (err) {
-                            res.json({
-                                result:"1",
-                                message: 'unable to insert into db',
-                                signature: '',
-                                certificate: {}
+                            db.insertChannel(subject, key, function (err) {
+                                if (err) {
+                                    res.json({
+                                        result:"1",
+                                        message: 'unable to insert into db',
+                                        signature: '',
+                                        certificate: {}
+                                    });
+                                }
+                                else {
+                                    res.json({
+                                        result:"0",
+                                        message: '',
+                                        signature: '',
+                                        certificate: crypto.getCertificate()
+                                    });
+                                }
                             });
                         }
                         else {
                             res.json({
-                                result:"0",
-                                message: '',
-                                signature: '',
-                                certificate: crypto.getCertificate()
+                                result:"1",
+                                message:'channel already exists',
+                                signature:'',
+                                certificate:{}
                             });
                         }
                     });
@@ -63,11 +75,11 @@ router.post('/', function(req, res) {
         });
     }
     else if (req.body.phase === 2) {
-        var certificate = req.body.certificate;
+        certificate = req.body.certificate;
         checkCertificate(certificate, res, function () {
             crypto.extractPublicKey(certificate, function (key) {
                 checkSignature(req.body, res, function () {
-                    db.getChannelByClient(key, function (err, channel) {
+                    db.getChannelByPublicKey(key, function (err, channel) {
                         if (err) {
                             res.json({
                                 result:"1",
@@ -117,11 +129,11 @@ router.post('/', function(req, res) {
         });
     }
     else if (req.body.phase === 3) {
-        var certificate = req.body.certificate;
+        certificate = req.body.certificate;
         checkCertificate(certificate, res, function () {
             crypto.extractPublicKey(certificate, function (key) {
                 checkSignature(req.body, res, function () {
-                    db.getChannelByClient(key, function (err, channel) {
+                    db.getChannelByPublicKey(key, function (err, channel) {
                         if (err) {
                             res.json({
                                 result:"1",

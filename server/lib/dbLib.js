@@ -183,7 +183,7 @@ exports.insertChannel = function (subject, publicKey, callback) {
     });
 };
 
-exports.getChannelByClient = function (publicKey, callback) {
+exports.getChannelByPublicKey = function (publicKey, callback) {
     getDocument('channels', {clientPublicKey: publicKey}, callback);
 };
 
