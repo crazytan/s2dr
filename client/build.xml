@@ -26,14 +26,14 @@
   <target name="jar" depends="compile">
     <jar basedir="${build}" destfile="s2dr.jar">
       <manifest>
-        <attribute name="Main-Class" value="s2dr.Test.Test"/>
+        <attribute name="Main-Class" value="s2dr.test.Test"/>
       </manifest>
     </jar>
     <delete dir="${build}"/>
   </target>
 
   <target name="test" depends="jar">
-    <java classname="s2dr.Test.Test" fork="true">
+    <java classname="s2dr.test.Test" fork="true">
       <classpath>
         <pathelement location="s2dr.jar"/>
         <fileset dir="${lib}">

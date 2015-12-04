@@ -1,4 +1,4 @@
-package s2dr.Client;
+package s2dr.client;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -49,11 +49,13 @@ public class InsecureClient {
             return SecureMessage.errorMessage("can't establish connection!").toString();
         }
         finally {
-            if (connection != null) connection.disconnect();
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String... args) {
         HttpURLConnection connection = null;
         try {
             URL url = new URL("http://localhost:8888/init");
@@ -72,7 +74,9 @@ public class InsecureClient {
             e.printStackTrace();
         }
         finally {
-            if (connection != null) connection.disconnect();
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
     }
 }

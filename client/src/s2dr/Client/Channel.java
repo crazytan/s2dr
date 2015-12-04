@@ -1,4 +1,4 @@
-package s2dr.Client;
+package s2dr.client;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -8,22 +8,24 @@ import java.nio.file.Path;
 import java.security.*;
 import java.util.*;
 
-import s2dr.CA.CA;
-import s2dr.Client.SecureClient.UID;
+import s2dr.ca.CA;
+import s2dr.client.SecureClient.UID;
 import com.google.gson.Gson;
 
 /**
  * A secure channel used by client
  */
-public class Channel {
+public final class Channel {
 
-    private SecretKey key;
+    private final SecretKey key;
 
-    private String clientIdentifier;
+    private final String clientIdentifier;
 
-    private String serverIdentifier;
+    private final String serverIdentifier;
 
-    private InsecureClient _client;
+    private final InsecureClient _client;
+
+    private static Map<UID, Channel> channels = new HashMap<>();
 
     private Channel(SecretKey key, String clientIdentifier, String serverIdentifier, InsecureClient _client) {
         this.key = key;
@@ -44,8 +46,6 @@ public class Channel {
             return SecureMessage.errorMessage(e.getMessage());
         }
     }
-
-    private static Map<UID, Channel> channels = new HashMap<>();
 
     private static PublicKey verifyCertAndExtractPublicKey(String certificate) {
         if (!CA.validateCertificate(certificate)) {
@@ -91,7 +91,7 @@ public class Channel {
         Map<String, String> map = new HashMap<String, String>();
         Map<String, String> map1 = gson.fromJson(response1, map.getClass());
         String rst1 = map1.get("result");
-        if (!rst1.equals("0")) {
+        if (!"0".equals(rst1)) {
             return InsecureMessage.errorMessage(map1.get("message"));
         }
         String rMessage1 = map1.get("message");
@@ -123,7 +123,7 @@ public class Channel {
 
         Map<String, String> map2 = gson.fromJson(response2, map.getClass());
         String rst2 = map2.get("result");
-        if (!rst2.equals("0")) {
+        if (!"0".equals(rst2)) {
             return InsecureMessage.errorMessage(map2.get("message"));
         }
         String rMessage2 = map2.get("message");
@@ -167,7 +167,7 @@ public class Channel {
 
         Map<String, String> map3 = gson.fromJson(response3, map.getClass());
         String rst3 = map3.get("result");
-        if (!rst3.equals("0")) {
+        if (!"0".equals(rst3)) {
             return InsecureMessage.errorMessage(map3.get("message"));
         }
         String rMessage3 = map3.get("message");
@@ -199,9 +199,12 @@ public class Channel {
         if (channels.containsKey(clientName)) {
             Channel channel = channels.get(clientName);
             SecureMessage m = channel.send(route, message);
-            if (!m.isSuccess()) return InsecureMessage.errorMessage(m.getMessage());
-            if (!m.getIdentifier().equals(channel.serverIdentifier))
+            if (!m.isSuccess()) {
+                return InsecureMessage.errorMessage(m.getMessage());
+            }
+            if (!m.getIdentifier().equals(channel.serverIdentifier)) {
                 return InsecureMessage.errorMessage("unrecognized identifier!");
+            }
             String rMessage = new String(ClientCrypto.AESDecrypt(ClientCrypto.toByte(m.getMessage()), channel.key));
             return InsecureMessage.newMessage(rMessage);
         }

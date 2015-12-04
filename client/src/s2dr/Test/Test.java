@@ -1,10 +1,10 @@
-package s2dr.Test;
+package s2dr.test;
 
-import s2dr.Client.ClientCrypto;
-import s2dr.Client.InsecureMessage;
-import s2dr.Client.SecureClient;
-import s2dr.Client.SecureClient.SecurityFlag;
-import s2dr.Client.SecureClient.Permission;
+import s2dr.client.ClientCrypto;
+import s2dr.client.InsecureMessage;
+import s2dr.client.SecureClient;
+import s2dr.client.SecureClient.SecurityFlag;
+import s2dr.client.SecureClient.Permission;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 /**
  * Test script
  */
-public class Test {
+public final class Test {
 
     private static final File workspace = new File(System.getenv("workspace"));
 
@@ -31,6 +31,8 @@ public class Test {
     private static SecureClient client1;
 
     private static SecureClient client2;
+
+    private Test() {}
 
     private static void saveFile(String client, String fileName, String text) throws IOException {
         File file = new File(workspace.getAbsolutePath() + "/" + client + "/" + fileName);
@@ -110,7 +112,7 @@ public class Test {
         System.out.println("done!");
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String... args) throws Exception {
         initialize();
 
         System.out.print("Client0: initializing session with server...");

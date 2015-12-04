@@ -1,4 +1,4 @@
-package s2dr.Test;
+package s2dr.test;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -10,7 +10,9 @@ import static com.mongodb.client.model.Filters.*;
 /**
  * A helper class for accessing Mongodb
  */
-public class Mongo {
+public final class Mongo {
+
+    private Mongo() {}
 
     private static String getPropertyByUID(String uid, String property) {
         MongoClient client = new MongoClient(new MongoClientURI("mongodb://localhost:8889"));

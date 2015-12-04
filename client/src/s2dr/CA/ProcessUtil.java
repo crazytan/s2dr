@@ -1,4 +1,4 @@
-package s2dr.CA;
+package s2dr.ca;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -8,11 +8,13 @@ import java.util.List;
 /**
  * A utility class for process management
  */
-public class ProcessUtil {
+public final class ProcessUtil {
 
     private static final File root = new File(System.getenv("root"));
 
-    public static Process createOpenSSLProcess(String[] args) throws IOException {
+    private ProcessUtil() {}
+
+    public static Process createOpenSSLProcess(String... args) throws IOException {
         List<String> command = new ArrayList<>();
         command.add("openssl");
         command.addAll(Arrays.asList(args));

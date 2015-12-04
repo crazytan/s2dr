@@ -5,7 +5,7 @@ var fs = require('fs'),
     db = require('../lib/dbLib'),
     crypto = require('../lib/cryptoLib');
 
-const prefix = './docs/';
+var prefix = './docs/';
 
 exports.opEnum = {
     checkIn: 0,

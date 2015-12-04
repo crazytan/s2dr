@@ -1,4 +1,4 @@
-package s2dr.Client;
+package s2dr.client;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -15,7 +15,9 @@ import java.util.Base64;
 /**
  * A helper class for cryptographic operations
  */
-public class ClientCrypto {
+public final class ClientCrypto {
+
+    private ClientCrypto() {}
 
     public static SecretKey GenerateAESKey(int length) {
         try{
@@ -38,7 +40,7 @@ public class ClientCrypto {
         catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return new byte[0];
     }
 
     public static byte[] AESDecrypt(byte[] text, SecretKey key) {
@@ -50,7 +52,7 @@ public class ClientCrypto {
         catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return new byte[0];
     }
 
     public static byte[] RSAEncrypt(byte[] text, PublicKey key) {
@@ -62,7 +64,7 @@ public class ClientCrypto {
         catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return new byte[0];
     }
 
     public static byte[] RSADecrypt(byte[] cipherText, PrivateKey key) {
@@ -74,7 +76,7 @@ public class ClientCrypto {
         catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return new byte[0];
     }
 
     public static byte[] RSADecrypt(byte[] cipherText, PublicKey key) {
@@ -86,7 +88,7 @@ public class ClientCrypto {
         catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return new byte[0];
     }
 
     public static byte[] Sign(byte[] text, PrivateKey key) {
@@ -98,7 +100,7 @@ public class ClientCrypto {
         catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return new byte[0];
     }
 
     public static byte[] doSHA256(byte[] text) {
@@ -109,16 +111,17 @@ public class ClientCrypto {
         catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return new byte[0];
     }
 
     private static String divideToLines(String string) {
         String multiLinesStr = "";
-        while (string.length() > 64) {
-            multiLinesStr = multiLinesStr + string.substring(0, 64) + "\n";
-            string = string.substring(64, string.length());
+        String tmp = string;
+        while (tmp.length() > 64) {
+            multiLinesStr = multiLinesStr + tmp.substring(0, 64) + "\n";
+            tmp = tmp.substring(64, tmp.length());
         }
-        multiLinesStr = multiLinesStr + string + "\n";
+        multiLinesStr = multiLinesStr + tmp + "\n";
         return multiLinesStr;
     }
 
@@ -142,10 +145,8 @@ public class ClientCrypto {
 
     public static PublicKey stringToPublicKey(String string) {
         try {
-            string =  string.replace("-----BEGIN PUBLIC KEY-----\n", "");
-            string =  string.replace("-----END PUBLIC KEY-----", "");
-            string =  string.replace("\n", "");
-            byte[] keyByte = Base64.getDecoder().decode(string.getBytes());
+            String tmp = string.replace("-----BEGIN PUBLIC KEY-----\n", "").replace("-----END PUBLIC KEY-----", "").replace("\n", "");
+            byte[] keyByte = Base64.getDecoder().decode(tmp.getBytes());
             return KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(keyByte));
         }
         catch (Exception e) {
@@ -156,10 +157,8 @@ public class ClientCrypto {
 
     public static PrivateKey stringToPrivateKey(String string) {
         try {
-            string =  string.replace("-----BEGIN PRIVATE KEY-----\n", "");
-            string =  string.replace("-----END PRIVATE KEY-----", "");
-            string =  string.replace("\n", "");
-            byte[] keyByte = Base64.getDecoder().decode(string.getBytes());
+            String tmp = string.replace("-----BEGIN PRIVATE KEY-----\n", "").replace("-----END PRIVATE KEY-----", "").replace("\n", "");
+            byte[] keyByte = Base64.getDecoder().decode(tmp.getBytes());
             return KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(keyByte));
         }
         catch (Exception e) {
@@ -170,10 +169,8 @@ public class ClientCrypto {
 
     public static SecretKey stringToAESKey(String string) {
         try {
-            string = string.replace("-----BEGIN AES KEY-----\n", "");
-            string =  string.replace("-----END AES KEY-----", "");
-            string =  string.replace("\n", "");
-            byte[] keyByte = Base64.getDecoder().decode(string.getBytes());
+            String tmp = string.replace("-----BEGIN AES KEY-----\n", "").replace("-----END AES KEY-----", "").replace("\n", "");
+            byte[] keyByte = Base64.getDecoder().decode(tmp.getBytes());
             return new SecretKeySpec(keyByte, 0, keyByte.length, "AES");
         }
         catch (Exception e) {
@@ -202,7 +199,9 @@ public class ClientCrypto {
     }
 
     private static Character digitToChar(int integer){
-        if (integer < 10) return (char) (integer + '0');
+        if (integer < 10) {
+            return (char) (integer + '0');
+        }
             //return Integer.toString(integer);
         switch (integer){
             case 10:
@@ -215,9 +214,8 @@ public class ClientCrypto {
                 return 'd';
             case 14:
                 return 'e';
-            case 15:
+            default:
                 return 'f';
         }
-        return null;
     }
 }

@@ -1,17 +1,19 @@
-package s2dr.Client;
+package s2dr.client;
 
 import com.google.gson.Gson;
 
 /**
  * A class representing secure message exchanged between channel and insecure client
  */
-public class SecureMessage {
+public final class SecureMessage {
 
-    private int result;
+    private final int result;
 
-    private String message;
+    private final String message;
 
-    private String identifier;
+    private final String identifier;
+
+    private static Gson gson = new Gson();
 
     private SecureMessage(int result, String message) {
         this.result = result;
@@ -31,8 +33,6 @@ public class SecureMessage {
         return identifier;
     }
 
-    private static Gson gson = new Gson();
-
     public static SecureMessage newMessage(String m) {
         return gson.fromJson(m, SecureMessage.class);
     }
@@ -41,7 +41,7 @@ public class SecureMessage {
         return new SecureMessage(1, message);
     }
 
-    public static void main(String[] args) {
+    public static void main(String... args) {
         SecureMessage m = SecureMessage.errorMessage("123");
         System.out.println(m);
     }

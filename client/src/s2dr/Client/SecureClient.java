@@ -1,6 +1,6 @@
-package s2dr.Client;
+package s2dr.client;
 
-import s2dr.CA.CA;
+import s2dr.ca.CA;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -171,21 +171,33 @@ public class SecureClient {
 
     private static SecurityFlag generateFlag(String flag) {
         int _flag = Integer.parseInt(flag);
-        if (_flag == 0) return SecurityFlag.none;
-        if (_flag == 1) return SecurityFlag.confidentiality;
-        if (_flag == 2) return SecurityFlag.integrity;
+        if (_flag == 0) {
+            return SecurityFlag.none;
+        }
+        if (_flag == 1) {
+            return SecurityFlag.confidentiality;
+        }
+        if (_flag == 2) {
+            return SecurityFlag.integrity;
+        }
         return SecurityFlag.both;
     }
 
     private static Permission generatePermission(String p) {
         int _p = Integer.parseInt(p);
-        if (_p == 0) return Permission.checkin;
-        if (_p == 1) return Permission.checkout;
-        if (_p == 2) return Permission.both;
+        if (_p == 0) {
+            return Permission.checkin;
+        }
+        if (_p == 1) {
+            return Permission.checkout;
+        }
+        if (_p == 2) {
+            return Permission.both;
+        }
         return Permission.owner;
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String... args) throws IOException {
         System.out.println("*** a client for s2dr ***");
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         SecureClient.prompt();
@@ -195,29 +207,43 @@ public class SecureClient {
             SecureClient.prompt();
             String[] commands = in.readLine().trim().split(" ");
             InsecureMessage message = null;
-            if (commands[0].isEmpty()) continue;
-            if (commands[0].equals("help")) SecureClient.printHelp();
-            if (commands[0].equals("exit")) break;
-            if (commands[0].equals("init"))
+            if (commands[0].isEmpty()) {
+                continue;
+            }
+            if (commands[0].equals("help")) {
+                SecureClient.printHelp();
+            }
+            if (commands[0].equals("exit")) {
+                break;
+            }
+            if (commands[0].equals("init")) {
                 message = client.init_session("server");
-            if (commands[0].equals("checkout"))
+            }
+            if (commands[0].equals("checkout")) {
                 message = client.check_out(client.generateUID(commands[1]));
-            if (commands[0].equals("checkin"))
+            }
+            if (commands[0].equals("checkin")) {
                 message = client.check_in(client.generateUID(commands[1]), commands[2], SecureClient.generateFlag(commands[3]));
-            if (commands[0].equals("delegate"))
+            }
+            if (commands[0].equals("delegate")) {
                 message = client.delegate(client.generateUID(commands[1]),
-                        commands[2].equals("all")?SecureClient.All:new SecureClient(commands[2]),
+                        commands[2].equals("all") ? SecureClient.All : new SecureClient(commands[2]),
                         Integer.parseInt(commands[3]),
                         SecureClient.generatePermission(commands[4]),
                         commands[5].equals("true"));
-            if (commands[0].equals("delete"))
+            }
+            if (commands[0].equals("delete")) {
                 message = client.safe_delete(client.generateUID(commands[1]));
-            if (commands[0].equals("terminate"))
+            }
+            if (commands[0].equals("terminate")) {
                 message = client.terminate();
-            if (message.isSuccess())
+            }
+            if (message.isSuccess()) {
                 System.out.println("operation successful!");
-            else
+            }
+            else {
                 System.out.println(message.getMessage());
+            }
         }
     }
 }

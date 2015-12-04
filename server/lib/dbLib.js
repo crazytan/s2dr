@@ -1,8 +1,8 @@
 /*
  * a MongoDB module for managing keys and meta-data
  */
-const port = 8889;
-var client = require('mongodb').MongoClient;
+var port = 8889,
+    client = require('mongodb').MongoClient;
 
 _getDocument = function (db, collectionName, property, callback) {
     db.collection(collectionName).find(property).toArray(function (err, items) {

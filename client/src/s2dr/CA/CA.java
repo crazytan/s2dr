@@ -1,17 +1,19 @@
-package s2dr.CA;
+package s2dr.ca;
 
 import java.io.*;
 
 /**
  * A class representing Certificate Authority
  */
-public class CA {
+public final class CA {
 
     private static final File root = new File(System.getenv("root"));
 
+    private CA() {}
+
     public static String extractPublicKeyFromCertificate(String certificate) {
         try {
-            Process ps = ProcessUtil.createOpenSSLProcess(new String[]{"x509", "-pubkey", "-noout"});
+            Process ps = ProcessUtil.createOpenSSLProcess("x509", "-pubkey", "-noout");
             ProcessUtil.writeStandardInput(certificate, ps);
             return ProcessUtil.getStandardOutput(ps);
         }
@@ -23,10 +25,12 @@ public class CA {
 
     public static boolean validateCertificate(String certificate) {
         try {
-            Process ps = ProcessUtil.createOpenSSLProcess(new String[] {"verify", "-trusted", "CA.crt"});
+            Process ps = ProcessUtil.createOpenSSLProcess("verify", "-trusted", "CA.crt");
             ProcessUtil.writeStandardInput(certificate, ps);
             String result = ProcessUtil.getStandardOutput(ps);
-            if (result.contains("OK")) return true;
+            if (result.contains("OK")) {
+                return true;
+            }
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -42,9 +46,9 @@ public class CA {
             writer.write(privateKey);
             writer.close();
 
-            Process ps = ProcessUtil.createOpenSSLProcess(new String[] {"req", "-new", "-key", tmpKey.getName(), "-subj", "/CN=" + name});
+            Process ps = ProcessUtil.createOpenSSLProcess("req", "-new", "-key", tmpKey.getName(), "-subj", "/CN=" + name);
             String csr = ProcessUtil.getStandardOutput(ps);
-            ps = ProcessUtil.createOpenSSLProcess(new String[] {"x509", "-req", "-days", "365", "-CA", "CA.crt", "-CAkey", "CA.key", "-CAserial", "CA.srl"});
+            ps = ProcessUtil.createOpenSSLProcess("x509", "-req", "-days", "365", "-CA", "CA.crt", "-CAkey", "CA.key", "-CAserial", "CA.srl");
             ProcessUtil.writeStandardInput(csr, ps);
             return ProcessUtil.getStandardOutput(ps);
         }
@@ -52,11 +56,10 @@ public class CA {
             e.printStackTrace();
         }
         finally {
-            if (tmpKey != null) tmpKey.delete();
+            if (tmpKey != null) {
+                tmpKey.delete();
+            }
         }
         return null;
-    }
-
-    public static void main(String[] args) throws IOException {
     }
 }

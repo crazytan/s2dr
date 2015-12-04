@@ -1,4 +1,4 @@
-package s2dr.Client;
+package s2dr.client;
 
 import com.google.gson.Gson;
 
@@ -11,11 +11,13 @@ import java.util.Map;
 /**
  * A class representing insecure message exchanged between client and channel
  */
-public class InsecureMessage {
+public final class InsecureMessage {
 
-    private int result;
+    private final int result;
 
-    private String message;
+    private final String message;
+
+    private static Gson gson = new Gson();
 
     private InsecureMessage(int result, String message) {
         this.result = result;
@@ -35,8 +37,6 @@ public class InsecureMessage {
         return gson.toJson(this);
     }
 
-    private static Gson gson = new Gson();
-
     public static InsecureMessage newMessage(String m) {
         return gson.fromJson(m, InsecureMessage.class);
     }
@@ -49,7 +49,7 @@ public class InsecureMessage {
         return new InsecureMessage(1, message);
     }
 
-    public static void main(String[] args) {
+    public static void main(String... args) {
 /*        Message m = Message.newMessage("{\"result\":0,\"message\":\"hello world\"}");
         System.out.println(m);
         System.out.println(m.isSuccess());
@@ -70,7 +70,8 @@ public class InsecureMessage {
         map.put("signature", "123");
         map.put("certificate", "{\"signature\":\"456\"}");
         System.out.println(gson.toJson(map));
-        Map<String, String> _map = gson.fromJson(gson.toJson(map), new HashMap<String, String>().getClass());
+        //Map<String, String> _map = gson.fromJson(gson.toJson(map), new HashMap<String, String>().getClass());
+        Map<String, String> _map = gson.fromJson(gson.toJson(map), HashMap.class);
         System.out.println(_map);
     }
 }
