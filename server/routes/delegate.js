@@ -21,18 +21,25 @@ router.post('/', function(req, res, next) {
                     next();
                 }
                 else {
-                    db.delegate(req.s2dr.message, meta.acl, ace, function (err) {
-                        if (err) {
-                            response.result = 1;
-                            response.message = 'unable to delegate: db operation failed!';
-                            next();
-                        }
-                        else {
-                            response.result = 0;
-                            response.message = '';
-                            next();
-                        }
-                    });
+                    if (req.s2dr.message.time <= 0) {
+                        response.result = 1;
+                        response.message = 'unable to delegate: time should be positive';
+                        next();
+                    }
+                    else {
+                        db.delegate(req.s2dr.message, meta.acl, ace, function (err) {
+                            if (err) {
+                                response.result = 1;
+                                response.message = 'unable to delegate: db operation failed!';
+                                next();
+                            }
+                            else {
+                                response.result = 0;
+                                response.message = '';
+                                next();
+                            }
+                        });
+                    }
                 }
             });
         }
