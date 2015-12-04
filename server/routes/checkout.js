@@ -9,7 +9,7 @@ router.post('/', function(req, res, next) {
     db.getMeta(req.s2dr.message.uid, function (err, meta) {
         if (err) {
             response.result = 1;
-            response.message = 'unable to get metadata!';
+            response.message = 'document not exists!';
             next();
         }
         else {
@@ -23,7 +23,7 @@ router.post('/', function(req, res, next) {
                 doc.getDoc(meta, function (err, document) {
                     if (err) {
                         response.result = 1;
-                        response.message = 'unable to retrieve document!';
+                        response.message = 'unable to retrieve document: ' + err.message;
                         next();
                     }
                     response.result = 0;

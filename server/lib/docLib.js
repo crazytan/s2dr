@@ -125,7 +125,7 @@ exports.getDoc = function (meta, callback) {
             if (err) callback(err, null);
             else {
                 var signature = crypto.hash(data);
-                if (signature !== decryptedSignature) callback(new Error(), null);
+                if (signature !== decryptedSignature) callback(new Error('file signature does not match!'), null);
                 else callback(null, data);
             }
         });
@@ -137,7 +137,7 @@ exports.getDoc = function (meta, callback) {
             else {
                 var plainText = crypto.AESDecrypt(data, key, 'utf8');
                 var signature = crypto.hash(plainText);
-                if (signature !== decryptedSignature) callback(new Error(), null);
+                if (signature !== decryptedSignature) callback(new Error('file signature does not match!'), null);
                 else callback(null, plainText);
             }
         });
