@@ -21,25 +21,15 @@ exports.secFlag = {
     both: 3
 };
 
-// filter expired ace
-filterExpired = function (acl) {
-    var now = Date.now();
-    var _acl = [];
-    for (var i = 0;i < acl.length;i++) {
-        if (acl[i].lifetime < 0) {
-            _acl.push(acl[i]);
-        }
-        else {
-            var elapsed = (now - acl[i].timestamp) / 1000.0;
-            if (elapsed < acl[i].lifetime) {
-                _acl.push(acl[i]);
-            }
-        }
-    }
-    return _acl;
+// check if ACE is expired
+isExpired = function (ace) {
+    if (ace.lifetime < 0) return false;
+    var elapsed = (Date.now() - ace.timestamp) / 1000.0;
+    return (elapsed >= ace.lifetime);
 };
 
-filterDuplicate = function (acl) {
+filterDuplicates = function (acl) {
+    if (acl.length <= 0) return null;
     var timestamp = acl[0].timestamp;
     var index = 0;
     for (var i = 0;i < acl.length;i++) {
@@ -75,27 +65,21 @@ exports.ifNew = function (uid) {
 };
 
 exports.checkPermit = function (acl, client, operation) {
-    var _acl = filterExpired(acl);
-    for (var i = 0;i < _acl.length;i++) {
-        if (((_acl[i].name === client) || (_acl[i].name === 'all')) && contains(_acl[i].permission, operation)) {
-            return true;
+    var _acl = [];
+    for (var i = 0;i < acl.length;i++) {
+        if (((acl[i].name === client) || (acl[i].name === 'all')) && contains(acl[i].permission, operation)) {
+            _acl.push(acl[i]);
         }
     }
-    return false;
+    var ace = filterDuplicates(_acl);
+    if (ace && !isExpired(ace)) return ace;
+    return null;
 };
 
 exports.checkDelegate = function (name, message, acl, callback) {
-    var _acl = filterExpired(acl);
-    var found = false;
-    var _acls = [];
-    for (var i = 0;i < _acl.length;i++) {
-        if (((_acl[i].name === name) || (_acl[i].name === 'all')) && contains(_acl[i].permission, message.permission) && _acl[i].propagation) {
-            found = true;
-            _acls.push(_acl[i]);
-        }
-    }
-    if (found) {
-        callback(null, filterDuplicate(_acls));
+    var ace = this.checkPermit(acl, name, message.permission);
+    if (ace && ace.propagation) {
+        callback(null, ace);
     }
     else {
         callback(new Error(), null);
