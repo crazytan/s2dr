@@ -104,7 +104,7 @@ exports.checkDelegate = function (name, message, acl, callback) {
 
 exports.getDoc = function (meta, callback) {
     var path = prefix + meta.UID;
-    var key = crypto.decryptKey(meta.key);
+    var key = crypto.RSADecrypt(new Buffer(meta.key, 'base64'), 'hex');
     if (meta.flag == this.secFlag.none) {
         fs.readFile(path, function (err, data) {
             if (err) callback(err, null);
@@ -174,7 +174,7 @@ exports.addDoc = function (channel, message, callback) {
         var key = crypto.generateAESKey();
         var signature = crypto.hash(message.document);
         var encryptedSignature = crypto.AESEncrypt(signature, key, 'hex');
-        var encryptedKey = crypto.encryptKey(key);
+        var encryptedKey = crypto.RSAEncrypt(key, 'base64', 'hex');
         meta.signature = encryptedSignature;
         meta.key = encryptedKey;
         db.insertMeta(meta, function (err) {
@@ -188,7 +188,7 @@ exports.addDoc = function (channel, message, callback) {
     }
     else if (message.flag == this.secFlag.confidentiality) {
         key = crypto.generateAESKey();
-        encryptedKey = crypto.encryptKey(key);
+        encryptedKey = crypto.RSAEncrypt(key, 'base64', 'hex');
         cipherText = crypto.AESEncrypt(message.document, key);
         meta.key = encryptedKey;
         db.insertMeta(meta, function (err) {
@@ -204,7 +204,7 @@ exports.addDoc = function (channel, message, callback) {
         key = crypto.generateAESKey();
         signature = crypto.hash(message.document);
         encryptedSignature = crypto.AESEncrypt(signature, key, 'hex');
-        encryptedKey = crypto.encryptKey(key);
+        encryptedKey = crypto.RSAEncrypt(key, 'base64', 'hex');
         var cipherText = crypto.AESEncrypt(message.document, key);
         meta.key = encryptedKey;
         meta.signature = encryptedSignature;
@@ -240,7 +240,7 @@ exports.updateDoc = function (channel, message, meta, callback) {
         var key = crypto.generateAESKey();
         var signature = crypto.hash(message.document);
         var encryptedSignature = crypto.AESEncrypt(signature, key, 'hex');
-        var encryptedKey = crypto.encryptKey(key);
+        var encryptedKey = crypto.RSAEncrypt(key, 'base64', 'hex');
         meta.signature = encryptedSignature;
         meta.key = encryptedKey;
         db.updateMeta(meta, function (err) {
@@ -254,7 +254,7 @@ exports.updateDoc = function (channel, message, meta, callback) {
     }
     else if (message.flag == this.secFlag.confidentiality) {
         key = crypto.generateAESKey();
-        encryptedKey = crypto.encryptKey(key);
+        encryptedKey = crypto.RSAEncrypt(key, 'base64', 'hex');
         cipherText = crypto.AESEncrypt(message.document, key);
         meta.key = encryptedKey;
         db.updateMeta(meta, function (err) {
@@ -270,7 +270,7 @@ exports.updateDoc = function (channel, message, meta, callback) {
         key = crypto.generateAESKey();
         signature = crypto.hash(message.document);
         encryptedSignature = crypto.AESEncrypt(signature, key, 'hex');
-        encryptedKey = crypto.encryptKey(key);
+        encryptedKey = crypto.RSAEncrypt(key, 'base64', 'hex');
         var cipherText = crypto.AESEncrypt(message.document, key);
         meta.key = encryptedKey;
         meta.signature = encryptedSignature;

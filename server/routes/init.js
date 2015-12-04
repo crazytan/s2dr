@@ -77,7 +77,7 @@ router.post('/', function(req, res) {
                             });
                         }
                         else {
-                            var J = crypto.decryptSecureMessage(req.body.message);
+                            var J = crypto.RSADecrypt(new Buffer(req.body.message, 'hex'));
                             var _J = new Buffer(crypto.generateAESKey(), 'hex');
                             if (J.length !== _J.length) {
                                 res.json({

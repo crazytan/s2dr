@@ -67,12 +67,15 @@ exports.AESDecrypt = function (m, key, encoding) {
     return decrypted;
 };
 
-exports.decryptKey = function (encryptedKey) {
-    return myPrivate.decrypt(encryptedKey, 'hex');
+exports.RSADecrypt = function (buf, encoding) {
+    if (encoding) {
+        return myPrivate.decrypt(buf, encoding);
+    }
+    return myPrivate.decrypt(buf);
 };
 
-exports.encryptKey = function (key) {
-    return myPrivate.encrypt(key, 'base64', 'hex');
+exports.RSAEncrypt = function (m, encoding, sourceEncoding) {
+    return myPrivate.encrypt(m, encoding, sourceEncoding);
 };
 
 exports.hash = function (m) {
@@ -94,14 +97,8 @@ exports.getCertificate = function () {
     return myCert;
 };
 
-exports.decryptSecureMessage = function (m) {
-    var buf = new Buffer(m, 'hex');
-    return myPrivate.decrypt(buf);
-};
-
 exports.sign = function (m) {
-    var hash = this.hash(m);
-    return myPrivate.encryptPrivate(hash, 'hex', 'hex');
+    return myPrivate.encryptPrivate(this.hash(m), 'hex', 'hex');
 };
 
 exports.extractPublicKey = function (certificate, callback) {
