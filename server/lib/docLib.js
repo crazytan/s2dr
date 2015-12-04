@@ -39,6 +39,23 @@ filterExpired = function (acl) {
     return _acl;
 };
 
+filterDuplicated = function (acl) {
+    var timestamp = acl[0].timestamp;
+    var index = 0;
+    for (var i = 0;i < acl.length;i++) {
+        if (acl[i].lifetime < 0) {
+            return acl[i];
+        }
+        else {
+            if (acl[i].timestamp - timestamp > 0) {
+                index = i;
+                timestamp = acl[i].timestamp;
+            }
+        }
+    }
+    return acl[index];
+};
+
 // check if permission grants operation
 contains = function (permission, operation) {
     if (permission == 3) return true;
@@ -70,12 +87,16 @@ exports.checkPermit = function (acl, client, operation) {
 exports.checkDelegate = function (name, message, acl, callback) {
     var _acl = filterExpired(acl);
     var found = false;
+    var _acls = [];
     for (var i = 0;i < _acl.length;i++) {
         if (((_acl[i].name === name) || (_acl[i].name === 'all')) && contains(_acl[i].permission, message.permission) && _acl[i].propagation) {
             found = true;
-            callback(null, _acl[i]);
+            _acls.push(_acl[i]);
+            //callback(null, _acl[i]);
         }
     }
+    var _acl_d = filterDuplicated(_acls);
+    callback(null, _acl_d);
     if (!found) callback(new Error(), null);
 };
 
