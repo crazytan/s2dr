@@ -72,8 +72,8 @@ public class Test {
         String mySignature = ClientCrypto.toHexString(ClientCrypto.doSHA256(text.getBytes()));
         System.out.println("Client signature: " + mySignature);
 
-        String dbSignature = Mongo.getSignatureByUID("0.txt");
-        String encryptedKey = Mongo.getKeyByUID("0.txt");
+        String dbSignature = Mongo.getSignatureByUID(UID);
+        String encryptedKey = Mongo.getKeyByUID(UID);
 
         Path path = FileSystems.getDefault().getPath(root + "/server/server.key");
         byte[] keyBytes = Files.readAllBytes(path);
