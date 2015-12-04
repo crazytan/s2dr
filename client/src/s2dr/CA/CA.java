@@ -7,7 +7,7 @@ import java.io.*;
  */
 public final class CA {
 
-    private static final File root = new File(System.getenv("root"));
+    private static final File root = new File("../");
 
     private CA() {}
 

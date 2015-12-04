@@ -71,7 +71,7 @@ public final class Channel {
         //Load Certificate
         String certificate = "";
         try{
-            Path path = FileSystems.getDefault().getPath(System.getenv("workspace") + "/" + clientName.id + "/certificate");
+            Path path = FileSystems.getDefault().getPath("workspace" + "/" + clientName.id + "/certificate");
             byte[] crtByte = Files.readAllBytes(path);
             certificate = new String(crtByte);
         }

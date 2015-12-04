@@ -1,6 +1,7 @@
 package s2dr.client;
 
 import s2dr.ca.CA;
+import sun.plugin2.gluegen.runtime.BufferFactory;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -197,6 +198,34 @@ public class SecureClient {
         return Permission.owner;
     }
 
+    private String readFromFile(String fileName) {
+        String data = "";
+        try {
+            Path path = FileSystems.getDefault().getPath("workspace/" + name.id + "/" + fileName);
+            data = new String(Files.readAllBytes(path));
+            return data;
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            return "";
+        }
+        finally {
+            return "";
+        }
+    }
+
+    private void saveToFile(String fileName, String data) {
+        try {
+            Path path = FileSystems.getDefault().getPath("workspace/" + name.id + "/" + fileName);
+            Files.write(path, data.getBytes());
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+        }
+    }
+
     public static void main(String... args) throws IOException {
         System.out.println("*** a client for s2dr ***");
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -212,6 +241,7 @@ public class SecureClient {
             }
             if (commands[0].equals("help")) {
                 SecureClient.printHelp();
+                continue;
             }
             if (commands[0].equals("exit")) {
                 break;
@@ -221,9 +251,13 @@ public class SecureClient {
             }
             if (commands[0].equals("checkout")) {
                 message = client.check_out(client.generateUID(commands[1]));
+                if (message.isSuccess()) {
+                    client.saveToFile(commands[1], message.getMessage());
+                }
             }
             if (commands[0].equals("checkin")) {
-                message = client.check_in(client.generateUID(commands[1]), commands[2], SecureClient.generateFlag(commands[3]));
+                String data = client.readFromFile(commands[2]);
+                message = client.check_in(client.generateUID(commands[1]), data, SecureClient.generateFlag(commands[3]));
             }
             if (commands[0].equals("delegate")) {
                 message = client.delegate(client.generateUID(commands[1]),
@@ -237,6 +271,9 @@ public class SecureClient {
             }
             if (commands[0].equals("terminate")) {
                 message = client.terminate();
+            }
+            if (message == null) {
+                continue;
             }
             if (message.isSuccess()) {
                 System.out.println("operation successful!");
