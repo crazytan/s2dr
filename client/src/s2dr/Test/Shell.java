@@ -86,12 +86,29 @@ public final class Shell {
         }
     }
 
+    private static boolean nameIsValid(String name) {
+        boolean isValid = false;
+        if (name.length() > 0) {
+            isValid = true;
+        }
+        if (!isValid) {
+            System.out.println("client name can't be empty!");
+        }
+        return isValid;
+    }
+
     public static void operate(String ...arg) throws IOException {
         System.out.println("*** a client for s2dr ***");
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        prompt();
-        System.out.print("enter the client name: ");
-        SecureClient client = new SecureClient(in.readLine().trim());
+        boolean nameIsValid = false;
+        String name = "";
+        while (!nameIsValid) {
+            prompt();
+            System.out.print("enter the client name: ");
+            name = in.readLine().trim();
+            nameIsValid = nameIsValid(name);
+        }
+        SecureClient client = new SecureClient(name);
         while (true) {
             prompt();
             String[] commands = in.readLine().trim().split(" ");
