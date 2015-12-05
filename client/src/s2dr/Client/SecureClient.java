@@ -157,28 +157,10 @@ public class SecureClient {
         }
     };
 
-    private static void prompt() {
-        System.out.print("> ");
-    }
-
-    private static void printHelp() {
-        System.out.println("Operations:        init, checkout, checkin, delegate, delete, terminate\n" +
-                "-init:             init\n" +
-                "-checkout:         checkout srcfile dstfile\n" +
-                "-checkin:          checkin dstfile srcfile flags\n" +
-                "-delegate:         delegate file client duration permissionFlags propagationFlags\n" +
-                "-delete:           delete file\n" +
-                "-terminate:        terminate\n" +
-                "-exit:             exit\n\n" +
-                "-checkinflags:     0/1/2/3 ==> none/confidentiality/integrity/both\n" +
-                "-permissionflags:  0/1/2/3 ==> checkin/checkout/both/owner\n" +
-                "-propagationflags: true/false");
-
-    }
-
     public UID generateUID(String uid) {
         return new UID(uid);
     }
+<<<<<<< Updated upstream
 
     private static SecurityFlag generateFlag(int flag) {
         int _flag = flag;//Integer.parseInt(flag);
@@ -321,4 +303,6 @@ public class SecureClient {
             }
         }
     }
+=======
+>>>>>>> Stashed changes
 }

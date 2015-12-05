@@ -198,14 +198,14 @@ public final class Channel {
     public static InsecureMessage send(UID clientName, String route, String message) {
         if (channels.containsKey(clientName)) {
             Channel channel = channels.get(clientName);
-            SecureMessage m = channel.send(route, message);
-            if (!m.isSuccess()) {
-                return InsecureMessage.errorMessage(m.getMessage());
+            SecureMessage msg = channel.send(route, message);
+            if (!msg.isSuccess()) {
+                return InsecureMessage.errorMessage(msg.getMessage());
             }
-            if (!m.getIdentifier().equals(channel.serverIdentifier)) {
+            if (!msg.getIdentifier().equals(channel.serverIdentifier)) {
                 return InsecureMessage.errorMessage("unrecognized identifier!");
             }
-            String rMessage = new String(ClientCrypto.AESDecrypt(ClientCrypto.toByte(m.getMessage()), channel.key));
+            String rMessage = new String(ClientCrypto.AESDecrypt(ClientCrypto.toByte(msg.getMessage()), channel.key));
             return InsecureMessage.newMessage(rMessage);
         }
         return InsecureMessage.errorMessage("client name not found!");

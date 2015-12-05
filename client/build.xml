@@ -37,7 +37,7 @@
     <jar basedir="${build}" destfile="s2dr-client.jar">
       <zipgroupfileset dir="${lib}" includes="*.jar"/>
       <manifest>
-        <attribute name="Main-Class" value="s2dr.client.SecureClient"/>
+        <attribute name="Main-Class" value="s2dr.test.Shell"/>
         <attribute name="Class-Path" value="${classpath}"/>
       </manifest>
     </jar>
