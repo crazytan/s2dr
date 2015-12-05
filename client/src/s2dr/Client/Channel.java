@@ -39,7 +39,7 @@ public final class Channel {
             String sMessage = ClientCrypto.toHexString(ClientCrypto.AESEncrypt(message.getBytes(), key));
             String response = _client.send(route,
                     "{\"identifier\":\"" + clientIdentifier + "\"," +
-                    "\"message\":\"" + sMessage + "\"}");
+                            "\"message\":\"" + sMessage + "\"}");
             return SecureMessage.newMessage(response);
         }
         catch (Exception e) {
@@ -208,6 +208,6 @@ public final class Channel {
             String rMessage = new String(ClientCrypto.AESDecrypt(ClientCrypto.toByte(msg.getMessage()), channel.key));
             return InsecureMessage.newMessage(rMessage);
         }
-        return InsecureMessage.errorMessage("client name not found!");
+        return InsecureMessage.errorMessage("please init channel first!");
     }
 }

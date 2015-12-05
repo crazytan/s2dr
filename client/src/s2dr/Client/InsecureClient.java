@@ -1,6 +1,7 @@
 package s2dr.client;
 
 import java.io.*;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -39,6 +40,9 @@ public class InsecureClient {
             byte[] response = new byte[in.available()];
             in.read(response, 0, in.available());
             return new String(response, "US-ASCII");
+        }
+        catch (ConnectException e) {
+            return SecureMessage.errorMessage("server is offline!").toString();
         }
         catch (MalformedURLException e) {
             e.printStackTrace();

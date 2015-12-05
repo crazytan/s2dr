@@ -7,7 +7,7 @@ import com.google.gson.Gson;
  */
 public final class SecureMessage {
 
-    private final int result;
+    private final String result;
 
     private final String message;
 
@@ -15,18 +15,23 @@ public final class SecureMessage {
 
     private static Gson gson = new Gson();
 
-    private SecureMessage(int result, String message) {
+    private SecureMessage(String result, String message) {
         this.result = result;
         this.message = message;
         identifier = "";
     }
 
     public boolean isSuccess() {
-        return result == 0;
+        return "0".equals(result);
     }
 
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String toString() {
+        return gson.toJson(this);
     }
 
     public String getIdentifier() {
@@ -38,7 +43,7 @@ public final class SecureMessage {
     }
 
     public static SecureMessage errorMessage(String message) {
-        return new SecureMessage(1, message);
+        return new SecureMessage("1", message);
     }
 
     public static void main(String... args) {

@@ -71,7 +71,7 @@ public final class Shell {
             return data;
         }
         catch (Exception e){
-            System.out.println("file " + fileName + " not found! Check-in empty content.");
+            System.out.println("file " + fileName + " not found! it's going to check-in empty content.");
         }
         return "";
     }
@@ -122,6 +122,7 @@ public final class Shell {
             }
             if (commands[0].equals("exit")) {
                 client.terminate();
+                System.out.println("*** thanks for using ***");
                 break;
             }
             if (commands[0].equals("init")) {
