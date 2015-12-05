@@ -5,3 +5,6 @@ CA.key
 CA.srl
 
 .DS_Store
+
+# PMD reports
+*.html
