@@ -8,7 +8,7 @@ Secure Shared Data Repository
 * openssl command line tool
 
 ### server
-* Node.js v5.1.0 & npm 3.3.12
+* Node.js v4.2.2 & npm 3.3.12
 * Mongod v3.0.7
 * openssl command line tool
 
