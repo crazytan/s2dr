@@ -26,6 +26,13 @@ public class SecureClient {
 
     private PrivateKey privateKey;
 
+    public static SecureClient All = new SecureClient() {
+        @Override
+        public UID getName() {
+            return new UID("all");
+        }
+    };
+
     public enum Permission {
         checkin, checkout, both, owner
     }
@@ -149,13 +156,6 @@ public class SecureClient {
     public InsecureMessage terminate() {
         return Channel.send(name, "terminate", "{}");
     }
-
-    public static SecureClient All = new SecureClient() {
-        @Override
-        public UID getName() {
-            return new UID("all");
-        }
-    };
 
     public UID generateUID(String uid) {
         return new UID(uid);
