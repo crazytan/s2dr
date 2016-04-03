@@ -91,3 +91,8 @@ To perform any test, start the MongoDB daemon by ```mongod -f dbconfig.yaml``` a
 The test as described in project deliverable can be invoked as ```ant test```
 
 To use the client as a REPL shell, first compile the jar file by ```ant```. Then the shell can be start by ```java -jar s2dr-client.jar```
+
+## Issues
+1. should add authentication method to DB
+2. information stored in DB should be encrypted
+3. should add nonce to messages to prevent attack
